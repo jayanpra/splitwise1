@@ -1,13 +1,14 @@
-import Navigator from '../landing/Navigator'
-import Forms from "./Forms"
+import React from 'react'
+import Navigator from "../landing/Navigator"
+import LoginForm from "./LoginForm"
 
-const Login = () => {
+const login = () => {
     return (
         <div>
             <Navigator/>
-            <Forms/>
+            <LoginForm/>
         </div>
     )
 }
 
-export default Login
+export default login
