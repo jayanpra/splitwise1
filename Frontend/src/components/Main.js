@@ -3,6 +3,7 @@ import Landing from './landing/Landing';
 import Register from './register/Register';
 import Login from './login/Login'
 import Dashboard from './dashboard/Dashboard'
+// <Route path="/login" component={Login}/>
 
 const Main = () => {
     return (

@@ -54,7 +54,7 @@ const SignupForms = ({onSubmit}) => {
                 </Row>
                 <Row>
                     <Col  md={{ span: 6, offset:3 }}>
-                <Button variant="primary" onClick={() => onSubmit(profile.fname, profile.lname, profile.email, profile.password)} type="submit">Submit
+                <Button variant="primary" onClick={() => onSubmit(profile.email, profile.fname, profile.lname, profile.password)} type="submit">Submit
                 </Button>
                 </Col>
                 </Row>

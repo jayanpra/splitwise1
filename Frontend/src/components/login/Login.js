@@ -1,20 +1,19 @@
-import Navigator from '../landing/Navigator'
-import SignupForms from "./SignupForms"
+import React from 'react'
+import Navigator from "../landing/Navigator"
+import LoginForm from "./LoginForm"
 import axios from 'axios'
-import {useState} from 'react'
 
-const Register = () => {
-    const on_submit_form = (email, fname, lname, password) => {
+const login = () => {
+    const on_Click_login = (email, password) => {
         let data = {
             email: email,
-            fname: fname,
-            lname: lname,
             password: password
         }
+        console.log("Waiting to send Signal")
         axios.defaults.withCredentials = true;
-        axios.post('http://localhost:3001/register',data)
+        axios.post('http://localhost:3001/login',data)
         .then(response => {
-            console.log("Status Code : ",response.status);
+            console.log("Status Code :",response.status);
             if(response.status === 200){
                 this.setState({
                     process_complete: true,
@@ -28,14 +27,13 @@ const Register = () => {
                     error : true
                 })
         });
-
-    }
+    } 
     return (
         <div>
             <Navigator/>
-            <SignupForms onSubmit={on_submit_form}/>
+            <LoginForm onClick={on_Click_login}/>
         </div>
     )
 }
 
-export default Register
+export default login

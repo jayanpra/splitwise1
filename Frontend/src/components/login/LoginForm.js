@@ -3,6 +3,7 @@ import FormGroup from '../common/FormGroup'
 import {Container, Row, Button, Form} from "react-bootstrap"
 
 const LoginForm = () => {
+    
     return (
         <div>
             <Container fluid style={{ backgroundColor: 'lightblue', height: '1000px'}}>
