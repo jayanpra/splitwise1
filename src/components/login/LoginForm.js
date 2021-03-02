@@ -1,5 +1,5 @@
 import React from 'react'
-import FormGroup from '../comman/FormGroup'
+import FormGroup from '../common/FormGroup'
 import {Container, Row, Button, Form} from "react-bootstrap"
 
 const LoginForm = () => {
