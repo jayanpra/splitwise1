@@ -1,8 +1,10 @@
 import React from 'react'
 import {Navbar,Container,Col, Button,NavbarBrand,} from 'react-bootstrap'
 import logo from './splitwise_logo.png'
+import NavbarDrop from '../common/NavbarDrop'
 
-const Navigator = () => {
+const Navigator = ({loggedin, onClickRegister, onClickLogin}) => {
+
     return (
         <div class="fixed-top">
             <Container fluid>
@@ -16,14 +18,24 @@ const Navigator = () => {
                         <Col sm={9}>
                         </Col>
                         <Col sm={1}>
-                        <Button type="button" class="btn btn-light">Login</Button>
-                        </Col><Col sm={1}>
-                        <Button style={{background:"green"}} type="button" class="btn btn-success">Register</Button>
+                        {loggedin ? (<NavbarDrop/>) : (
+                        <Button type="button" onClick={onClickLogin} class="btn btn-light">Login</Button>
+                        )}
+                        </Col>
+                        <Col sm={1}>
+                        {loggedin ? <br/> : (
+                        <Button style={{background:"green"}} onClick={onClickRegister} type="button" class="btn btn-success">Register</Button>
+                        )}
                         </Col>
                     </Navbar>
             </Container>
         </div>
     )
 }
+Navigator.defaultProps = {
+    loggedin: false,
+    onClickRegister: null,
+    onClickLogin: null
 
+}
 export default Navigator

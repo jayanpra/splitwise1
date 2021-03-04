@@ -1,9 +1,19 @@
-import React from 'react'
+import {useState} from 'react'
 import Navigator from "../landing/Navigator"
 import LoginForm from "./LoginForm"
 import axios from 'axios'
+import { Redirect } from "react-router-dom";
 
-const login = () => {
+const Login = () => {
+    let [clickstate,setClick] = useState(null)
+
+    const onClickRegister = () => {
+        setClick(clickstate = "register")
+    }
+
+    if (clickstate === "register") {
+        return <Redirect to='/register'/>
+    }
     const on_Click_login = (email, password) => {
         let data = {
             email: email,
@@ -27,13 +37,14 @@ const login = () => {
                     error : true
                 })
         });
-    } 
+    }
+
     return (
         <div>
-            <Navigator/>
+            <Navigator onClickRegister={onClickRegister}/>
             <LoginForm onClick={on_Click_login}/>
         </div>
     )
 }
 
-export default login
+export default Login

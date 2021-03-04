@@ -1,4 +1,4 @@
-import {Route, Router} from 'react-router-dom';
+import {Route} from 'react-router-dom';
 import Landing from './landing/Landing';
 import Register from './register/Register';
 import Login from './login/Login'
@@ -9,7 +9,10 @@ import Profile from './profile/Profile'
 const Main = () => {
     return (
         <div>
+            <Route path="/login" component={Login}/>
+            <Route path="/register" component={Register}/>
             <Route path="/profile" component={Profile}/>
+            <Route path="/landing" component={Landing}/>
         </div>
     )
 }
