@@ -1,7 +1,7 @@
 import React from 'react'
 import {Container, Jumbotron, Col} from 'react-bootstrap'
 import logo from './splitwise_logo.png'
-import bg from './bg_landing.jpg'
+//import bg from './bg_landing.jpg'
 
 const LandingBody = () => {
     return (

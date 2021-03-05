@@ -1,5 +1,5 @@
 import React from 'react'
-import {Navbar,Container,Col, Button,NavbarBrand,} from 'react-bootstrap'
+import {Navbar,Container,Col, Button, NavbarBrand,} from 'react-bootstrap'
 import logo from './splitwise_logo.png'
 import NavbarDrop from '../common/NavbarDrop'
 
@@ -19,12 +19,12 @@ const Navigator = ({loggedin, onClickRegister, onClickLogin}) => {
                         </Col>
                         <Col sm={1}>
                         {loggedin ? (<NavbarDrop/>) : (
-                        <Button type="button" onClick={onClickLogin} class="btn btn-light">Login</Button>
+                        <Button type="button" onClick={onClickLogin} className="btn btn-light">Login</Button>
                         )}
                         </Col>
                         <Col sm={1}>
                         {loggedin ? <br/> : (
-                        <Button style={{background:"green"}} onClick={onClickRegister} type="button" class="btn btn-success">Register</Button>
+                        <Button style={{background:"green"}} onClick={onClickRegister} type="button" className="btn btn-success">Register</Button>
                         )}
                         </Col>
                     </Navbar>

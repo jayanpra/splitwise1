@@ -1,6 +1,8 @@
 import {useState} from 'react'
 import {Form,Container, Row, Col, Button} from 'react-bootstrap'
 import FormGroup from "../common/FormGroup"
+import {useDispatch} from 'react-redux'
+
 
 const SignupForms = ({onSubmit}) => {
     let [profile, setProfile] =useState({
@@ -9,6 +11,7 @@ const SignupForms = ({onSubmit}) => {
         email: null, 
         password: null
     });
+    const dispatch = useDispatch()
     const onFnameChange = (e) => {
         setProfile({
             ...profile,
@@ -33,6 +36,10 @@ const SignupForms = ({onSubmit}) => {
             password: e.target.value
         });
     }
+    const onSave = (e) => {
+        dispatch({type:"Register", payload:{email:profile.email, password:profile.password, fname:profile.fname, lname:profile.lname}})
+        onSubmit()
+    }
     return (
         <div>
             <Container fluid style={{ backgroundColor: 'lightblue', height: '1000px'}}>
@@ -54,7 +61,7 @@ const SignupForms = ({onSubmit}) => {
                 </Row>
                 <Row>
                     <Col  md={{ span: 6, offset:3 }}>
-                <Button variant="primary" onClick={() => onSubmit(profile.email, profile.fname, profile.lname, profile.password)} type="submit">Submit
+                <Button variant="primary" onClick={onSave} type="button">Submit
                 </Button>
                 </Col>
                 </Row>

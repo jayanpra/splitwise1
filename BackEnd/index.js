@@ -49,11 +49,13 @@ app.post('/register',function(req,res) {
 
 app.post('/login', function(req,res) {
     let sqlQuery = `SELECT password  FROM userInfo WHERE email=\'${req.body.email}\';`
-    db.query(sqlInsert, (err, result) => {
+    console.log(sqlQuery)
+    db.query(sqlQuery, (err, result, fields) => {
         if (!err){
             if (result.length == 1 && hashFunction.verify(req.body.password, result[0].password)) {
-                res.cookie('cookie',req.body.email,{maxAge: 900000, httpOnly: false, path : '/'});
-                req.session.user = req.body.email;
+                //res.cookie('cookie',req.body.email,{maxAge: 900000, httpOnly: false, path : '/'});
+                //req.session.user = req.body.email;
+                console.log("Successfully Verified", result)
                 res.writeHead(200,{
                     'Content-Type' : 'text/plain'
                 })
@@ -68,6 +70,7 @@ app.post('/login', function(req,res) {
             
         }
         else {
+            console.log(err)
             res.writeHead(204,{
                 'Content-Type' : 'text/plain'
             })
