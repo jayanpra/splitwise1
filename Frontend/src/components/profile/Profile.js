@@ -1,13 +1,51 @@
-import React from 'react'
+import {useState, useEffect} from 'react'
 import Navigator from '../landing/Navigator'
 import {Col,Row, Container} from 'react-bootstrap'
 import ProfileView from './ProfileView'
 import ProfileMetric from './profileMetric'
+import { Redirect } from 'react-router-dom'
+import axios from 'axios'
 
 const Profile = () => {
     const currency = [ "USD", "KWD", "BHD", "GBP", "EUR", "CAD"]
     const timezone = ["abc", "def"]
     const language = ["English", "French", "German"]
+    const [data,setData] = useState({
+        name: null,
+        email: null,
+        phone: null,
+        currency: null,
+        timezone: null,
+        language: null,
+        image: null
+    })
+
+    useEffect(() => {
+        const token = localStorage.getItem("token")
+        if (token) {
+            const data = {"token":token}
+            axios.defaults.withCredentials = true;
+            axios.post('http://localhost:3001/profile/initialPull',data)
+                .then(response => {
+                    console.log("Status Code :",response.status);
+                    if(response.status === 200){
+                        setData({name: response.data.name,
+                        email: response.data.email,
+                        phone: response.data.phone,
+                        currency: response.data.currency,
+                        timezone: response.data.timezone,
+                        language: response.data.language,
+                        image: response.data.image})
+                    }
+                })
+                .then(response => {
+                    console.log("Status Code : ",response)
+                });
+        }
+        else {
+            return <Redirect to='/landing'/>
+        }
+      });
     return (
         <div>
             <Navigator loggedin={true}/>

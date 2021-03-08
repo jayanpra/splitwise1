@@ -4,7 +4,7 @@ const app = express();
 const cors = require('cors')
 const bodyParser = require('body-parser');
 const hashFunction = require('password-hash');
-const cookieParser = require('cookie-parser');
+const jwtoken= require('jsonwebtoken');
 
 app.set('view engine', 'ejs');
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
@@ -16,6 +16,43 @@ const db = mysql.createPool({
     password: "password",
     database: "splitwiseStorage"
 })
+const get_id = (token) => {
+    if (!token){
+        return null;
+    }
+    else {
+        jwtoken.verify(token,"jwtSecret", (err,decoded) => {
+            if (err) {
+                return null;
+            }
+            else {
+                return decoded.id;
+            }
+        })
+    }
+}
+const verifyToken = (req,res,next) => {
+    const token =  req.headers["x-access-token"]
+    if (!token){
+        res.send("No Token found")
+    }
+    else {
+        jwtoken.verify(token,"jwtSecret", (err,decoded) => {
+            if (err) {
+                res.json({auth: false, message: "Authentication failed"})
+            }
+            else {
+                res.userID = decoded.id;
+                next();
+            }
+        })
+    }
+
+}
+
+app.get("/check/auth", verifyToken,(req,res) => {
+    res.send("Authentication Successful")
+});
 /*
 app.use(function(req, res, next){
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
@@ -46,19 +83,49 @@ app.post('/register',function(req,res) {
         }
     })
 });
-
+app.post('/profile/initialPull', function(req,res){
+    const id = get_id("req.body.token")
+    const sqlQuery = `SELECT * from userInfo WHERE id=${id}`
+    db.query(sqlQuery, (err, result, fields) => {
+        if (!err){
+            res.writeHead(200,{
+                'Content-Type' : 'text/plain'
+            })
+            res.json({auth:true, 
+                name: result[0].fname + " " + result[0].lname,
+                email: result[0].email,
+                phone: result[0].phone,
+                currency: result[0].currency,
+                timezone: result[0].timezone,
+                language: result[0].language,
+                image: result[0].image})
+            res.end("Successful Submitted");    
+        }
+        else {
+            console.log(err)
+            res.writeHead(204,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Issue with data base")
+        }
+    })
+})
 app.post('/login', function(req,res) {
-    let sqlQuery = `SELECT password  FROM userInfo WHERE email=\'${req.body.email}\';`
+    let sqlQuery = `SELECT * FROM userInfo WHERE email=\'${req.body.email}\';`
     console.log(sqlQuery)
     db.query(sqlQuery, (err, result, fields) => {
         if (!err){
             if (result.length == 1 && hashFunction.verify(req.body.password, result[0].password)) {
-                //res.cookie('cookie',req.body.email,{maxAge: 900000, httpOnly: false, path : '/'});
-                //req.session.user = req.body.email;
+                req.session.user = req.body.email
+                const id = result[0].id
+                const token = jwtoken.sign({id},"jwtSecret", {
+                    expireIn: 300,
+                })
                 console.log("Successfully Verified", result)
                 res.writeHead(200,{
                     'Content-Type' : 'text/plain'
                 })
+                res.json({auth:true, token: token})
                 res.end("Successful Submitted");
             }
             else {
