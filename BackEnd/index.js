@@ -21,14 +21,16 @@ const get_id = (token) => {
         return null;
     }
     else {
+        let data
         jwtoken.verify(token,"jwtSecret", (err,decoded) => {
             if (err) {
-                return null;
+                data = null;
             }
             else {
-                return decoded.id;
+                data = decoded['data'];
             }
         })
+        return data;
     }
 }
 const verifyToken = (req,res,next) => {
@@ -42,7 +44,7 @@ const verifyToken = (req,res,next) => {
                 res.json({auth: false, message: "Authentication failed"})
             }
             else {
-                res.userID = decoded.id;
+                res.userID = decoded.data.id;
                 next();
             }
         })
@@ -84,22 +86,25 @@ app.post('/register',function(req,res) {
     })
 });
 app.post('/profile/initialPull', function(req,res){
-    const id = get_id("req.body.token")
+    const id = get_id(req.body.token)
+    console.log(get_id(req.body.token)," is ID")
     const sqlQuery = `SELECT * from userInfo WHERE id=${id}`
+    console.log(sqlQuery)
     db.query(sqlQuery, (err, result, fields) => {
         if (!err){
+            console.log(result)
             res.writeHead(200,{
                 'Content-Type' : 'text/plain'
             })
-            res.json({auth:true, 
+            const endData = {auth:true, 
                 name: result[0].fname + " " + result[0].lname,
                 email: result[0].email,
                 phone: result[0].phone,
                 currency: result[0].currency,
                 timezone: result[0].timezone,
                 language: result[0].language,
-                image: result[0].image})
-            res.end("Successful Submitted");    
+                image: result[0].image}
+            res.end(JSON.stringify(endData));    
         }
         else {
             console.log(err)
@@ -116,17 +121,16 @@ app.post('/login', function(req,res) {
     db.query(sqlQuery, (err, result, fields) => {
         if (!err){
             if (result.length == 1 && hashFunction.verify(req.body.password, result[0].password)) {
-                req.session.user = req.body.email
                 const id = result[0].id
-                const token = jwtoken.sign({id},"jwtSecret", {
-                    expireIn: 300,
+                const token = jwtoken.sign({data: id},"jwtSecret", {
+                    expiresIn: '1h'
                 })
                 console.log("Successfully Verified", result)
                 res.writeHead(200,{
                     'Content-Type' : 'text/plain'
                 })
-                res.json({auth:true, token: token})
-                res.end("Successful Submitted");
+                console.log("Admitted", token)
+                res.end(JSON.stringify({auth:true, token: token}));
             }
             else {
                 res.writeHead(204,{

@@ -2,7 +2,8 @@ import React from 'react'
 import {Container, Row, Col} from 'react-bootstrap'
 import ProfileImage from './profileImage'
 
-const ProfileView = () => {
+const ProfileView = (para) => {
+    console.log(para)
     return (
         <div>
             <Container>
@@ -12,15 +13,15 @@ const ProfileView = () => {
                     </Col>
                     <Col>
                         <Row>
-                            <h5>Name</h5>
+                            <h5>{para.name}</h5>
                             
                         </Row>
                         <Row>
-                            <h5>email</h5>
+                            <h5>{para.email}</h5>
                             
                         </Row>
                         <Row>
-                            <h5>phone</h5>
+                            <h5>{para.phone}</h5>
                         </Row>
                     </Col>
                 </Row>

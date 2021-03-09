@@ -18,6 +18,7 @@ const Login = () => {
         return <Redirect to='/register'/>
     }
     const on_Click_login = (email, password) => {
+        console.log(email,"email")
         let data = {
             email: email,
             password: password
