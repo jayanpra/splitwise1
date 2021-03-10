@@ -3,7 +3,7 @@ import {Container, Row, Col} from 'react-bootstrap'
 import ProfileImage from './profileImage'
 
 const ProfileView = (para) => {
-    console.log(para)
+    console.log(para," is Para")
     return (
         <div>
             <Container>

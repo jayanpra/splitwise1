@@ -1,58 +1,58 @@
-import {useState, useEffect} from 'react'
-import Navigator from '../landing/Navigator'
-import {Col,Row, Container} from 'react-bootstrap'
-import ProfileView from './ProfileView'
-import ProfileMetric from './profileMetric'
-import { Redirect } from 'react-router-dom'
-import axios from 'axios'
+import { useState, useEffect } from 'react';
+import { Col, Row, Container } from 'react-bootstrap';
+import axios from 'axios';
+import { Redirect } from 'react-router-dom';
+import Navigator from '../landing/Navigator';
+import ProfileView from './ProfileView';
+import ProfileMetric from './profileMetric';
 
 const Profile = () => {
-    const currency = [ "USD", "KWD", "BHD", "GBP", "EUR", "CAD"]
-    const timezone = ["abc", "def"]
-    const language = ["English", "French", "German"]
-    const [data,setData] = useState({
-        name: null,
-        email: null,
-        phone: null,
-        currency: null,
-        timezone: null,
-        language: null,
-        image: null
-    })
+  const currency = ['USD', 'KWD', 'BHD', 'GBP', 'EUR', 'CAD'];
+  const timezone = ['abc', 'def'];
+  const language = ['English', 'French', 'German'];
+  const [data, setData] = useState({
+    name: null,
+    email: null,
+    phone: null,
+    currency: null,
+    timezone: null,
+    language: null,
+    image: null,
+  });
 
-    useEffect(() => {
-        if (data.name === null) {
-            const token = localStorage.getItem("token")
-            if (token) {
-                const data = {"token":token}
-                axios.defaults.withCredentials = true;
-                axios.post('http://localhost:3001/profile/initialPull',data)
-                    .then(response => {
-                        console.log("Status Code :",response.status);
-                        console.log(response.data)
-                        if(response.status === 200){
-                            setData({name: response.data.name,
-                            email: response.data.email,
-                            phone: response.data.phone,
-                            currency: response.data.currency,
-                            timezone: response.data.timezone,
-                            language: response.data.language,
-                            image: response.data.image})
-                        }
-                    })
-                    .then(response => {
-                        console.log("Status Code : ",response)
-                    }
-                );
+  useEffect(() => {
+    if (data.name === null) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const serverData = { 'token': token };
+        axios.defaults.withCredentials = true;
+        axios.post('http://localhost:3001/profile/initialPull', serverData)
+          .then((response) => {
+            if (response.status === 200) {
+              setData(
+                {
+                  name: response.data.name,
+                  email: response.data.email,
+                  phone: response.data.phone,
+                  currency: response.data.currency,
+                  timezone: response.data.timezone,
+                  language: response.data.language,
+                  image: response.data.image,
+                },
+              );
             }
-            else {
-                return <Redirect to='/landing'/>
-            }
-        }        
-    });
+          })
+          .then((response) => {
+          }); 
+      }
+      else {
+        return <Redirect to='/landing'/>
+      }
+    }
+  });
 
-    return (
-        <div>
+  return (
+    <div>
             <Navigator loggedin={true}/>
             <Row style={{marginTop:"100px"}}>
                 <Col sm={7}>
@@ -81,7 +81,7 @@ const Profile = () => {
                 <Col sm={1}></Col>
             </Row>
         </div>
-    )
-}
+  );
+};
 
-export default Profile
+export default Profile;
