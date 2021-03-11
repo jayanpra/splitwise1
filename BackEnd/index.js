@@ -115,6 +115,30 @@ app.post('/profile/initialPull', function(req,res){
         }
     })
 })
+
+app.post('/profile/update', function(req,res){
+    const id = get_id(req.body.token)
+    const sqlQuery = `INSERT INTO userInfo (${req.body.data.type}) VALUES (\'${req.body.data.value}\') WHERE id=${id};`
+    console.log(sqlQuery)
+    db.query(sqlQuery, (err, result, fields) => {
+        if (!err){
+            console.log(result)
+            res.writeHead(200,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Successful Submission");    
+        }
+        else {
+            console.log(err)
+            res.writeHead(204,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Issue with data base")
+        }
+    })
+})
+
+
 app.post('/login', function(req,res) {
     let sqlQuery = `SELECT * FROM userInfo WHERE email=\'${req.body.email}\';`
     console.log(sqlQuery)

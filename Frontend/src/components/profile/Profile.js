@@ -43,6 +43,7 @@ const Profile = () => {
             }
           })
           .then((response) => {
+            return <Redirect to='/landing'/>
           }); 
       }
       else {
@@ -51,12 +52,60 @@ const Profile = () => {
     }
   });
 
+  const update_local_info = (value, key) => {
+    switch (key) {
+      case 'name':{
+        setData({...data, name: value,})
+        break;
+      }
+      case 'email':{
+        setData({...data, email: value,})
+        break;
+      }
+      case 'phone':{
+        setData({...data, phone: value,})
+        break;
+      }
+      case 'currency':{
+        setData({...data, currency: value,})
+        break;
+      }
+      case 'timezone':{
+        setData({...data, timezone: value,})
+        break;
+      }
+      case 'language':{
+        setData({...data, language: value,})
+        break;
+      }
+      case 'image':{
+        setData({...data, image: value,})
+        break;
+      }
+      default:
+        break;
+    }
+  }
+  const onProfileChange = (value) => {
+    const pckg = {token:localStorage.getItem('token'), data: value}
+    axios.defaults.withCredentials = true;
+    axios.post('http://localhost:3001/profile/update', pckg)
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("Records Saved")
+          update_local_info(value.value, value.type)
+        }
+      })
+      .then((response) => {
+          console.log("DataBase Issue")
+      }); 
+  }
   return (
     <div>
             <Navigator loggedin={true}/>
-            <Row style={{marginTop:"100px"}}>
+            <Row style={{marginTop:"100px"}}> 
                 <Col sm={7}>
-                    <ProfileView para={data}/>
+                    <ProfileView para={data} onChange={() => onProfileChange()}/>
                 </Col>
                 <Col sm={4}>
                     <Row>
