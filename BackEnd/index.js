@@ -118,7 +118,7 @@ app.post('/profile/initialPull', function(req,res){
 
 app.post('/profile/update', function(req,res){
     const id = get_id(req.body.token)
-    const sqlQuery = `INSERT INTO userInfo (${req.body.data.type}) VALUES (\'${req.body.data.value}\') WHERE id=${id};`
+    const sqlQuery = `UPDATE userInfo SET ${req.body.data.type} = \'${req.body.data.value}\' WHERE id=${id};`
     console.log(sqlQuery)
     db.query(sqlQuery, (err, result, fields) => {
         if (!err){

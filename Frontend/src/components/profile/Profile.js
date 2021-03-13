@@ -105,25 +105,25 @@ const Profile = () => {
             <Navigator loggedin={true}/>
             <Row style={{marginTop:"100px"}}> 
                 <Col sm={7}>
-                    <ProfileView para={data} onChange={() => onProfileChange()}/>
+                    <ProfileView para={data} onChange={onProfileChange}/>
                 </Col>
                 <Col sm={4}>
                     <Row>
                     <Container style={{height:"100px", marginTop:"50px"}}>
                         <h5 style={{textAlign: "left"}}>Your Currency:</h5>
-                        <ProfileMetric options={currency} para={data["currency"]}/>
+                        <ProfileMetric head={"Currency"} options={currency} para={data["currency"]} onChange={onProfileChange}/>
                     </Container>
                     </Row>
                     <Row>
                     <Container style={{height:"100px"}}>
                         <h5 style={{textAlign: "left"}}>Your Timezone:</h5>
-                        <ProfileMetric options={timezone} para={data["timezone"]}/>
+                        <ProfileMetric head={"Timezone"} options={timezone} para={data["timezone"]} onChange={onProfileChange}/>
                     </Container>
                     </Row>
                     <Row>
                     <Container style={{height:"100px"}}>
                         <h5 style={{textAlign: "left"}}>Your Language:</h5>
-                        <ProfileMetric options={language} para={data["language"]}/>
+                        <ProfileMetric head={"Language"} options={language} para={data["language"]} onChange={onProfileChange}/>
                     </Container>
                     </Row>
                 </Col>
