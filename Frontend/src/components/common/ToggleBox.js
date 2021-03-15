@@ -17,7 +17,7 @@ const ToggleBox = ({heading, value, onChange}) => {
     }
     return (
         <div>
-            <h5 style={{color:"blue", textAlign:"left"}}>{heading}</h5>
+            <h5 style={{ textAlign:"left"}}>{heading}</h5>
             {editmode ? <div>
                 <InputGroup className="mb-3" >
                     <FormControl

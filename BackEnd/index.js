@@ -51,7 +51,6 @@ const verifyToken = (req,res,next) => {
     }
 
 }
-
 app.get("/check/auth", verifyToken,(req,res) => {
     res.send("Authentication Successful")
 });
@@ -72,6 +71,7 @@ app.post('/register',function(req,res) {
     let sqlInsert = `INSERT INTO userInfo (email, fname, lname, password) VALUES (\'${req.body.email}\',\'${req.body.fname}\',\'${req.body.lname}\',\'${password}\');`
     db.query(sqlInsert, (err, result) => {
         if (!err){
+            console.log(result.insertId)
             res.writeHead(200,{
                 'Content-Type' : 'text/plain'
             })
@@ -136,6 +136,61 @@ app.post('/profile/update', function(req,res){
             res.end("Issue with data base")
         }
     })
+})
+
+app.post('/groupCreate', function(req,res){
+    const id = get_id(req.body.token)
+    let sqlQuery = `INSERT INTO groupInfo (group_Name,owner_id) VALUES (\'${req.body.group_name}\',\'${id}\');`
+    let group_id, user_list ;
+    db.query(sqlQuery, (err, result) => {
+        if (!err){
+            group_id = result.insertId;
+            user_list = '';
+            for (i in req.body.group_members) {
+                user_list = user_list + `\'${req.body.group_members[i]}\', `
+            }
+            user_list = user_list.substring(0, user_list.length-2)
+            sqlQuery = `Select id FROM userInfo WHERE email IN (${user_list});`;
+            let act_user_list = []
+            db.query(sqlQuery, (err, result) => {
+                if (!err){
+                    let values = `(${group_id}, ${id}, 'active'), `;
+                    for (let i in result){
+                        values = values + `(${group_id}, ${result[i].id}, 'inactive'), `
+                    }
+                    values = values.substring(0, values.length-2)
+                    sqlQuery = `INSERT INTO groupMem (group_id, member_id, active) VALUES ${values};`;
+                    db.query(sqlQuery, (err, result) => {
+                        if (!err){
+                            res.writeHead(200,{
+                                'Content-Type' : 'text/plain'
+                            })
+                        res.end("Sucessful Operation")
+                        }
+                        else {
+                            res.writeHead(204,{
+                                'Content-Type' : 'text/plain'
+                            })
+                            res.end("Issue with data base")
+                        }
+                    })
+                }
+                else {
+                    res.writeHead(204,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("Issue with data base")
+                }
+            })
+        }
+        else {
+            res.writeHead(204,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Issue with data base")
+        }
+    })
+    
 })
 
 

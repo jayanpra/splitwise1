@@ -5,6 +5,7 @@ import { Redirect } from 'react-router-dom';
 import Navigator from '../landing/Navigator';
 import ProfileView from './ProfileView';
 import ProfileMetric from './profileMetric';
+import GroupSide from '../common/GroupSide';
 
 const Profile = () => {
   const currency = ['USD', 'KWD', 'BHD', 'GBP', 'EUR', 'CAD'];
@@ -104,10 +105,13 @@ const Profile = () => {
     <div>
             <Navigator loggedin={true}/>
             <Row style={{marginTop:"100px"}}> 
-                <Col sm={7}>
+                <Col sm={2}>
+                <GroupSide/>
+                </Col>
+                <Col sm={6}>
                     <ProfileView para={data} onChange={onProfileChange}/>
                 </Col>
-                <Col sm={4}>
+                <Col sm={3}>
                     <Row>
                     <Container style={{height:"100px", marginTop:"50px"}}>
                         <h5 style={{textAlign: "left"}}>Your Currency:</h5>
