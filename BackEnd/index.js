@@ -229,6 +229,104 @@ app.post('/login', function(req,res) {
     })
 })
 
+app.post('/groupFill', function(req,res) {
+    const id = get_id(req.body.token)
+    let sqlQuery = `SELECT T1.group_id AS gid, T1.active AS act, T2.group_name AS name FROM groupMem AS T1 LEFT JOIN groupInfo AS T2 ON  T1.group_id = T2.group_id WHERE T1.member_id = ${id};`
+    let group_info=[];
+    let expenses=[];
+    db.query(sqlQuery, (err, result) => {
+        if (!err){
+            for (let i in result) {
+                group_list.push({name:result[i].name, id:result[i].gid, active: result[i].act})
+            }
+            let sqlQuery = `SELECT T1.date AS date, T1.shares AS share, T2.fname AS fname, T1.amount as amount FROM groupExpense AS T1 LEFT JOIN userInfo AS T2 ON  T1.payee_id = T2.id WHERE T1.group_id = ${group_list[0].id};`
+            db.query(sqlQuery, (err, result) => {
+                if (!err){
+                    for (let i in result) {
+                        expenses.push({date:result[i].date, shares:result[i].share, payee: result[i].fname, amount: result[i].amount})
+                    }
+                    const finaldata = {group:group_list, expense: expenses}
+                    res.end(JSON.stringify(finaldata))
+                }
+                else {
+                    res.writeHead(204,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("Issue with data base")
+                }
+            })
+            res.end(JSON.stringify(endData))
+        }
+        else {
+            res.writeHead(204,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Issue with data base")
+        }
+    })
+})
+
+app.post(('./expenseAdd'),function(req,res) {
+    const id = get_id(req.body.token)
+    const group_name = req.body.group_name;
+    const expense = req.body.expense;
+    const expense_name = req.body.expense_name;
+    let sqlQuery = `SELECT T1.member_id AS mem, T1.group_id AS gid  FROM groupMem as T1 LEFT JOIN groupInfo as T2 ON T1.group_id = T2.group_ID WHERE T2.group_Name = \'${group_name}\' AND T1.active = \'active\' ;`
+    let member_inv=[];
+    let expenses='';
+    let expense_per_person = 0.0;
+    db.query(sqlQuery, (err, result) => {
+        if (!err){
+            const group_id = result[0].gid
+            expense_per_person = (expense / result.length).toFixed(2);
+            let date = new Date();
+            const date_string = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+            for (let i in result) {
+                member_inv.push(result[i].mem)
+            }
+            sqlQuery = `INSERT INTO groupExpense (group_id,date,payee_id,amount,shares,expense_name) VALUES (${group_id}, \'${date_string}\',${id}, ${expense}, ${member_inv.length}, ${expense_name});`
+            db.query(sqlQuery, (err, result) => {
+                if (!err){
+                    let expense_id = result.insertId;
+                    for (let i in member_inv){
+                        expenses = expenses + `(${id}, ${result[i].mem}, ${expense_per_person}, ${result[0].gid}, ${expense_id}, ${expense_name}), ` 
+                    }
+                    expenses = expenses.substring(0, expenses.length-2)
+                    sqlQuery = `INSERT INTO iExpense (lender_id,borrow_id,expense,group_id,expense_id, expense_name) VALUES ${expenses};`
+                    db.query(sqlQuery, (err, result) => {
+                        if (!err){
+                            res.writeHead(200,{
+                                'Content-Type' : 'text/plain'
+                            })
+                            res.end("Sucessfully Added")
+                            
+                        }
+                        else {
+                            res.writeHead(204,{
+                                'Content-Type' : 'text/plain'
+                            })
+                            res.end("Issue with data base")
+                        }
+                    })
+                }
+                else {
+                    res.writeHead(204,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("Issue with data base")
+                }
+            })
+            res.end(JSON.stringify(endData))
+        }
+        else {
+            res.writeHead(204,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Issue with data base")
+        }
+    })
+})
+
 app.listen(3001, () => {
     console.log("listening on port 3001")
 })

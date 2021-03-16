@@ -30,6 +30,7 @@ const Profile = () => {
         axios.post('http://localhost:3001/profile/initialPull', serverData)
           .then((response) => {
             if (response.status === 200) {
+              localStorage.setItem("currency", response.data.currency)
               setData(
                 {
                   name: response.data.name,
@@ -68,6 +69,7 @@ const Profile = () => {
         break;
       }
       case 'currency':{
+        localStorage.setItem("currency", value)
         setData({...data, currency: value,})
         break;
       }
