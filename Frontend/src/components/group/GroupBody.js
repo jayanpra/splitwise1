@@ -1,13 +1,23 @@
 import React from 'react'
-import {Container, Row, Col} from 'react-bootstrap'
-import ExpenseBar from '../common/ExpenseBar'
+import { MDBCard, MDBCardBody, MDBCardTitle,  MDBBtn,  MDBContainer } from 'mdbreact';
+import DashItems from '../common/DashItems';
 
-const GroupBody = ({group_name, expenses}) => {
+const GroupBody = ({name, expense_list}) => {
+    console.log(expense_list)
     return (
         <div>
-            <Container style={{ backgroundColor: 'lightgreen', position: "fixed"}}>
-                <ExpenseBar date='March 12' name='grocery' payee='Jayant' amount="USD 50"/>
-            </Container>
+            <MDBContainer style={{width:"800px", height:"100px"}}>
+                <MDBCard>
+                <MDBCardBody>
+                    <MDBCardTitle style={{textalign:"left"}}> {name}</MDBCardTitle>
+                        
+                    </MDBCardBody>
+                    </MDBCard>
+            </MDBContainer>
+            {expense_list.map((expense)=> (
+                <DashItems group={name} body={expense}/>
+            ))
+            }
         </div>
     )
 }

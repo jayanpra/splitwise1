@@ -3,7 +3,7 @@ import { } from "mdbreact";
 import { ProSidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 import 'react-pro-sidebar/dist/css/styles.css';
 import { Link } from 'react-router-dom';
-const GroupSide = ({groups, launchExpense}) => {
+const GroupSide = ({groupname, launchExpense, changeGroup}) => {
 
     return (
         <ProSidebar>
@@ -12,8 +12,9 @@ const GroupSide = ({groups, launchExpense}) => {
         <MenuItem>Dashboard</MenuItem>
         <MenuItem>Profile<Link to="/profile" /></MenuItem>
         <MenuItem onClick={launchExpense}>Add An Expense</MenuItem>
+        {groupname ? null : <MenuItem>Group<Link to="/group" /></MenuItem> }
         <SubMenu title="Your Group">
-        {groups ? groups.map((group)=> <MenuItem>{group}</MenuItem>):  <MenuItem>No Groups Available</MenuItem>}
+        {groupname ? groupname.map((group)=> <MenuItem onClick={() => changeGroup(group)}>{group}</MenuItem>):  <MenuItem>No Groups Available</MenuItem>}
                 </SubMenu>
         <MenuItem>Logout</MenuItem>
         </Menu>

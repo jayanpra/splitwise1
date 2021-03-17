@@ -6,10 +6,35 @@ import Navigator from '../landing/Navigator';
 import ProfileView from './ProfileView';
 import ProfileMetric from './profileMetric';
 import GroupSide from '../common/GroupSide';
+import AddExpense from '../common/AddExpense';
 
 const Profile = () => {
   const currency = ['USD', 'KWD', 'BHD', 'GBP', 'EUR', 'CAD'];
-  const timezone = ['abc', 'def'];
+  const timezone = ['UTC - 12:00',
+    'UTC - 11:00',
+    'UTC - 10:00',
+    'UTC - 09:00',
+    'UTC - 08:00',
+    'UTC - 07:00',
+    'UTC - 06:00',
+    'UTC - 05:00',
+    'UTC - 04:00',
+    'UTC - 03:00',
+    'UTC - 02:00',
+    'UTC - 01:00',
+    'UTC',
+    'UTC + 01:00',
+    'UTC + 02:00',
+    'UTC + 03:00',
+    'UTC + 04:00',
+    'UTC + 05:00',
+    'UTC + 06:00',
+    'UTC + 07:00',
+    'UTC + 08:00',
+    'UTC + 09:00',
+    'UTC + 10:00',
+    'UTC + 11:00',
+    'UTC + 12:00'];
   const language = ['English', 'French', 'German'];
   const [data, setData] = useState({
     name: null,
@@ -21,6 +46,8 @@ const Profile = () => {
     image: null,
   });
 
+  const [expTog, setToggle] = useState(false)
+
   useEffect(() => {
     if (data.name === null) {
       const token = localStorage.getItem('token');
@@ -31,6 +58,7 @@ const Profile = () => {
           .then((response) => {
             if (response.status === 200) {
               localStorage.setItem("currency", response.data.currency)
+              localStorage.setItem("fname", response.data.name.split( )[0])
               setData(
                 {
                   name: response.data.name,
@@ -103,12 +131,16 @@ const Profile = () => {
           console.log("DataBase Issue")
       }); 
   }
+  const showAddExpense = () => {
+    setToggle(!expTog)
+  } 
   return (
     <div>
-            <Navigator loggedin={true}/>
+        <AddExpense open={expTog} onToggle={showAddExpense}/>
+        <Navigator loggedin={true}/>
             <Row style={{marginTop:"100px"}}> 
                 <Col sm={2}>
-                <GroupSide/>
+                <GroupSide launchExpense={showAddExpense}/>
                 </Col>
                 <Col sm={6}>
                     <ProfileView para={data} onChange={onProfileChange}/>

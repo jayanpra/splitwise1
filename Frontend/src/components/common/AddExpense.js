@@ -13,15 +13,14 @@ const AddExpense = ({open, onToggle}) => {
             expense: exp,
         }
         axios.defaults.withCredentials = true;
-            axios.post('http://localhost:3001/expenseAdd', data)
-              .then((response) => {
+        axios.post('http://localhost:3001/expenseAdd', data)
+            .then((response) => {
                 if (response.status === 200) {
-                  open = false
+                  onToggle()
                 }
               })
-              .then((response) => {
-                
-              }); 
+            .then((response) => {
+            }); 
     }
     return (
         <MDBModal isOpen={open} toggle={onToggle}>
