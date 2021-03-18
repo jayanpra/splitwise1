@@ -15,7 +15,7 @@ const Main = () => {
             <Route path="/login" component={Login}/>
             <Route path="/register" component={Register}/>
             <Route path="/profile" component={Profile}/>
-            <Route path="/landing" component={Landing}/>
+            <Route path="/" component={Landing}/>
             <Route path="/group" component={GroupPage}/>
             <Route path="/creategroup" component={GroupCreate}/>
             <Route path="/recent" component={Recent}/>

@@ -47,6 +47,7 @@ const Profile = () => {
   });
 
   const [expTog, setToggle] = useState(false)
+  const [delayed, noSession] = useState(false)
 
   useEffect(() => {
     if (data.name === null) {
@@ -77,7 +78,7 @@ const Profile = () => {
           }); 
       }
       else {
-        return <Redirect to='/landing'/>
+        noSession(true)
       }
     }
   });
@@ -136,6 +137,7 @@ const Profile = () => {
   } 
   return (
     <div>
+        {delayed ? <Redirect to='/landing'/>: null}
         <AddExpense open={expTog} onToggle={showAddExpense}/>
         <Navigator loggedin={true}/>
             <Row style={{marginTop:"100px"}}> 

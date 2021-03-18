@@ -87,6 +87,13 @@ app.post('/register',function(req,res) {
 });
 app.post('/profile/initialPull', function(req,res){
     const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
     console.log(get_id(req.body.token)," is ID")
     const sqlQuery = `SELECT * from userInfo WHERE id=${id}`
     console.log(sqlQuery)
@@ -140,6 +147,13 @@ app.post('/profile/update', function(req,res){
 
 app.post('/groupCreate', function(req,res){
     const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
     let sqlQuery = `INSERT INTO groupInfo (group_Name,owner_id) VALUES (\'${req.body.group_name}\',\'${id}\');`
     let group_id, user_list ;
     db.query(sqlQuery, (err, result) => {
@@ -231,7 +245,16 @@ app.post('/login', function(req,res) {
 
 app.post('/groupFill', function(req,res) {
     const id = get_id(req.body.token)
-    let sqlQuery = `SELECT T1.group_id AS gid, T1.active AS act, T2.group_name AS name FROM groupMem AS T1 LEFT JOIN groupInfo AS T2 ON  T1.group_id = T2.group_id WHERE T1.member_id = ${id};`
+    if (!id){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
+    let sqlQuery = `SELECT T1.group_id AS gid, T1.active AS act, T2.group_name AS name 
+                    FROM groupMem AS T1 LEFT JOIN groupInfo AS T2 ON  T1.group_id = T2.group_id 
+                    WHERE T1.member_id = ${id};`
     let group_list=[];
     let expenses=[];
     db.query(sqlQuery, (err, result) => {
@@ -279,6 +302,13 @@ app.post('/groupFill', function(req,res) {
 
 app.post('/altergroup',function(req,res) {
     const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
     console.log(req.body)
     const group_id = req.body.group_id;
     const sqlQuery = `UPDATE groupMem SET active = 'active' WHERE group_id=${group_id} AND member_id=${id};`
@@ -302,6 +332,13 @@ app.post('/altergroup',function(req,res) {
 
 app.post('/expenseAdd',function(req,res) {
     const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
     const group_name = req.body.group_name;
     const expense = req.body.expense;
     const expense_name = req.body.expense_name;
@@ -366,6 +403,13 @@ app.post('/expenseAdd',function(req,res) {
 
 app.post('/groupChange',function(req,res) {
     const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
     let expenses=[];
     let sqlQuery = `SELECT T1.date AS date, T1.expense_name as exp_name, T1.shares AS share, T2.id as pid, T2.fname AS fname, T1.amount as amount FROM gExpense AS T1 LEFT JOIN userInfo AS T2 ON  T1.payee_id = T2.id WHERE T1.group_id = ${req.body.group_id};`
     db.query(sqlQuery, (err, result) => {
@@ -398,9 +442,18 @@ app.post('/groupChange',function(req,res) {
 
 app.post('/pullRecent', function(req,res){
     const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
     let group_ids = '';
     let group_list = []
-    let sqlQuery = `SELECT T1.group_id as gid, T2.group_name AS name FROM groupMem AS T1 LEFT JOIN groupInfo AS T2 ON T1.group_id = T2.group_ID WHERE T1.member_id = ${id} AND T1.active='active';`
+    let sqlQuery = `SELECT T1.group_id as gid, T2.group_name AS name 
+                    FROM groupMem AS T1 LEFT JOIN groupInfo AS T2 ON T1.group_id = T2.group_ID 
+                    WHERE T1.member_id = ${id} AND T1.active='active';`
     console.log(sqlQuery)
     db.query(sqlQuery, (err, result, fields) => {
         if (!err){
@@ -412,8 +465,8 @@ app.post('/pullRecent', function(req,res){
             group_ids = group_ids.substring(0,group_ids.length-2);
             sqlQuery = `SELECT T1.group_id AS gid, T1.date AS date, T1.amount AS amt, T1.shares as share, T1.expense_name AS exp_name, T1.payee_id as pid, T2.fname AS name
                         FROM gExpense AS T1 LEFT JOIN userInfo AS T2 ON T1.payee_id = T2.id
-                        WHERE T1.group_id IN (${group_ids});`
-
+                        WHERE T1.expense_id = ANY (SELECT expense_id FROM iExpense WHERE lender_id = ${id} OR borrow_id = ${id});`
+            console.log(sqlQuery)
             db.query(sqlQuery, (err, result, fields) => {
                 if (!err){
                     let expense_data = [];
@@ -462,7 +515,7 @@ app.post('/pullRecent', function(req,res){
 app.post('/getDash', function(req,res){
     console.log("All Okay Here")
     const id = get_id(req.body.token)
-    if (id === null){
+    if (!id){
         res.writeHead(204,{
             'Content-Type' : 'text/plain'
         })
@@ -470,36 +523,44 @@ app.post('/getDash', function(req,res){
         return
     }
     let ledger = new Object();
+    let object = new Object();
     const sqlQuery = `SELECT T1.borrow_id as bid, T1.expense_name as ename, T1.expense as amt, T2.fname AS fname 
                     FROM iExpense AS T1 LEFT JOIN userInfo AS T2 ON T1.borrow_id = T2.id
-                    WHERE T1.lender_id=${id};`
+                    WHERE T1.lender_id=${id} AND T1.lender_id != T1.borrow_id;`
     console.log(sqlQuery)
     db.query(sqlQuery, (err, result, fields) => {
         if (!err){
             for (let i in result){
                 if (result[i].bid in ledger) {
                     ledger[result[i].bid].push({color:"green", expense: result[i].amt, person: result[i].fname, ename: result[i].ename})
+                    object[result[i].bid] = object[result[i].lid] + result[i].amt
                 }
                 else{
                     ledger[result[i].bid] = []
+                    object[result[i].bid] = 0.0
                     ledger[result[i].bid].push({color:"green", expense: result[i].amt, person: result[i].fname, ename: result[i].ename})
+                    object[result[i].bid] = result[i].amt
                 }
             }
             const sqlQuery = `SELECT T1.lender_id as lid, T1.expense_name as ename, T1.expense as amt, T2.fname AS fname 
                     FROM iExpense AS T1 LEFT JOIN userInfo AS T2 ON T1.lender_id = T2.id
-                    WHERE T1.borrow_id=${id};`
+                    WHERE T1.borrow_id=${id} AND T1.lender_id != T1.borrow_id;`
             db.query(sqlQuery, (err, result, fields) => {
                 if (!err){
                     for (let i in result){
                         if (result[i].lid in ledger) {
                             ledger[result[i].lid].push({color:"red", expense: result[i].amt, person: result[i].fname, ename: result[i].ename})
+                            object[result[i].lid] = object[result[i].lid] - result[i].amt
                         }
                         else{
                             ledger[result[i].lid] = []
+                            object[result[i].lid] = 0.0
                             ledger[result[i].lid].push({color:"red", expense: result[i].amt, person: result[i].fname, ename: result[i].ename})
+                            object[result[i].lid] = 0.0 - result[i].amt
                         }
                     }
-                    const final_data = {accounts: ledger}
+                    console.log(object)
+                    const final_data = {accounts: ledger, balance: object}
                     res.writeHead(200,{
                         'Content-Type' : 'text/plain'
                     })
@@ -524,9 +585,57 @@ app.post('/getDash', function(req,res){
     })
 })
 
+app.post('/settleUp', function(req,res){
+    const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
+    settle_values = ''
+    const settle_data = req.body.settle
+    let keys = Object.keys(settle_data)
+    for (let i in keys){
+        if (settle_data[keys[i]] > 0){
+            settle_values = settle_values + `(${keys[i]}, ${id}, ${settle_data[keys[i]]}, 0, 0, \'settle_up\'), `
+        }
+        else {
+            settle_values = settle_values + `(${id}, ${keys[i]}, ${settle_data[keys[i]] * -1}, 0, 0, \'settle_up\'), `
+        }
+    }
+    settle_values = settle_values.substring(0, settle_values.length-2)
+    const sqlQuery = `INSERT INTO iExpense(lender_id,borrow_id,expense,group_id,expense_id, expense_name) VALUES ${settle_values} ;`
+    console.log(sqlQuery)
+    db.query(sqlQuery, (err, result, fields) => {
+        if (!err){
+            console.log(result)
+            res.writeHead(200,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Successful Submission");    
+        }
+        else {
+            console.log(err)
+            res.writeHead(204,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Issue with data base")
+        }
+    })
+})
+
 app.get('/groupSuggest',function(req,res) {
     console.log(req.header)
     const id = get_id(req.header.token)
+    if (!id){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
     const sqlQuery = `SELECT email AS em FROM userInfo;`
     let list = [];
     db.query(sqlQuery, (err, result) => {

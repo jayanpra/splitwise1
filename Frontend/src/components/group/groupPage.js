@@ -21,6 +21,7 @@ const GroupPage = () => {
     const [expTog, setToggle] = useState(false)
     const [group_req, getReq] = useState([])
     const [show_req, toggleShow] = useState(false)
+    const [delayed, noSession] = useState(false)
 
     useEffect(() => {
         if (data.name === null) {
@@ -45,11 +46,11 @@ const GroupPage = () => {
                 console.log(data);
               })
               .then((response) => {
-                return <Redirect to='/landing'/>
+                console.log(response)
               }); 
           }
           else {
-            return <Redirect to='/landing'/>
+            noSession(true)
           }
         }
     });
@@ -116,6 +117,7 @@ const GroupPage = () => {
 
     return (
         <div>
+            {delayed ? <Redirect to='/landing'/>: null}
             <AddExpense open={expTog} onToggle={showAddExpense}/>
             <Navigator loggedin={true}/>
             <Container fluid style={{ backgroundColor: 'lightblue', position: "fixed", top: 0, left:0, height: "1000px" }}>

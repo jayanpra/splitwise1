@@ -13,7 +13,9 @@ const GroupCreate = () => {
     const [groupMem, changeMember] = useState({members: [], group_member_no: [1], refresh: false})
     const [suggestion, suggest] = useState([])
     const [init, over] = useState(true)
-    const [textState, setTextState] = useState('');
+    const [textState, setTextState] = useState('')
+    const [delayed, noSession] = useState(false)
+
     let [completions] = useAutocomplete(textState, suggestion);
     const addField = (e) => {
         groupMem.group_member_no.push(groupMem.group_member_no.length + 1)
@@ -26,6 +28,9 @@ const GroupCreate = () => {
     useEffect (() => {
         if (init) {
             const token = {token: localStorage.getItem('token')}
+            if (!token){
+                noSession(true)
+            }
             axios.get('http://localhost:3001/groupSuggest', { headers: {"token": `${token}`} } )
             .then((response) => {
                 console.log("Sucessful")
@@ -71,6 +76,7 @@ const GroupCreate = () => {
 
     return (
         <div>
+            {delayed ? <Redirect to='/landing'/>: null}
             <Navigator loggedin={true}/>
             <Row style={{marginTop:"100px"}}> 
                 <Col sm={2}>

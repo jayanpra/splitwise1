@@ -3,13 +3,15 @@ import {Container, Col, Row} from 'react-bootstrap';
 import Navigator from '../landing/Navigator'; 
 import GroupSide from '../common/GroupSide'
 import RecentTab from '../common/RecentTab'
-import { MDBCard, MDBCardBody, MDBCardTitle, MDBCardText, MDBCol, MDBRow, MDBContainer } from 'mdbreact';
+import { MDBCard, MDBCardBody, MDBCardTitle, MDBContainer, MDBBtn } from 'mdbreact';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 
 const Recent = () => {
     const [user_list, changeList] = useState([])
     const [initial_pull, pullExit] = useState(true)
+    const [delayed, noSession] = useState(false)
+    const [btn, nameChange] = useState("Last Activity First")
     useEffect(() => {
         if(initial_pull)
         {
@@ -25,16 +27,28 @@ const Recent = () => {
                     }
                 })
                 .then((response) => {
-                    return <Redirect to='/landing'/>
+                    console.log("err: ", response)
                 }); 
             }
             else {
-                return <Redirect to='/landing'/>
+                noSession(true)
             }
         }
     })
+
+    const changeOrder = () => {
+        console.log("Change Started")
+        changeList(user_list.reverse())
+        if (btn === "Last Activity First") {
+           nameChange("First Activity First")
+        }
+        else{
+            nameChange("Last Activity First")
+        }
+    }
     return (
         <div>
+            {delayed ? <Redirect to='/landing'/>: <br/>}
             <Navigator loggedin={true}/>
             <Container fluid style={{ backgroundColor: 'lightblue', position: "fixed", top: 0, left:0, height: "1000px" }}>
             <Row><MDBContainer>
@@ -50,11 +64,12 @@ const Recent = () => {
                 <MDBCard style={{backgroundColor:"DodgerBlue"}}>
                 <MDBCardBody>
                     <MDBCardTitle style={{textalign:"left"}}>Recent Activity Page</MDBCardTitle>
+                    <MDBBtn id="toggler" style={{backgroundColor:"lightgreen"}} onClick={() => changeOrder()}>{btn}</MDBBtn>
                         </MDBCardBody>
                     </MDBCard>
-                </MDBContainer><br/>
+                </MDBContainer><br/><br/>
                     {user_list.map((user) => 
-                        <RecentTab body={user}/>
+                       <div><RecentTab body={user}/><br/><br/><br/></div>
                     )}
                 </Col>
             </Row>
