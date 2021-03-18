@@ -4,7 +4,8 @@ import Register from './register/Register';
 import Login from './login/Login'
 import GroupPage from './group/groupPage'
 import GroupCreate from './group/groupCreate'
-//import Dashboard from './dashboard/Dashboard'
+import Recent from './recent/Recent'
+import Dashboard from './dashboard/Dashboard'
 import Profile from './profile/Profile'
 // <Route path="/login" component={Login}/>
 
@@ -17,6 +18,8 @@ const Main = () => {
             <Route path="/landing" component={Landing}/>
             <Route path="/group" component={GroupPage}/>
             <Route path="/creategroup" component={GroupCreate}/>
+            <Route path="/recent" component={Recent}/>
+            <Route path="/dash" component={Dashboard}/>
         </div>
     )
 }

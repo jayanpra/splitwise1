@@ -396,6 +396,160 @@ app.post('/groupChange',function(req,res) {
     })
 })
 
+app.post('/pullRecent', function(req,res){
+    const id = get_id(req.body.token)
+    let group_ids = '';
+    let group_list = []
+    let sqlQuery = `SELECT T1.group_id as gid, T2.group_name AS name FROM groupMem AS T1 LEFT JOIN groupInfo AS T2 ON T1.group_id = T2.group_ID WHERE T1.member_id = ${id} AND T1.active='active';`
+    console.log(sqlQuery)
+    db.query(sqlQuery, (err, result, fields) => {
+        if (!err){
+            console.log(result)
+            for (let i in result){
+                group_ids = group_ids + `${result[i].gid}, `
+                group_list = [...group_list, {id: result[i].gid, name:result[i].name}]
+            } 
+            group_ids = group_ids.substring(0,group_ids.length-2);
+            sqlQuery = `SELECT T1.group_id AS gid, T1.date AS date, T1.amount AS amt, T1.shares as share, T1.expense_name AS exp_name, T1.payee_id as pid, T2.fname AS name
+                        FROM gExpense AS T1 LEFT JOIN userInfo AS T2 ON T1.payee_id = T2.id
+                        WHERE T1.group_id IN (${group_ids});`
+
+            db.query(sqlQuery, (err, result, fields) => {
+                if (!err){
+                    let expense_data = [];
+                    console.log(result)
+                    for (let i in result){
+                        group_name = '';
+                        for (let j in group_list){
+                            if (result[i].gid === group_list[j].id){
+                                group_name = group_list[j].name
+                                break
+                            }
+                        }
+                        if (result[i].pid === id){
+                            expense_data.push({uname: result[i].name, ename: result[i].exp_name, gname: group_name, color: "green", date:result[i].date, amount:result[i].amt, share:result[i].share})
+                        }
+                        else{
+                            expense_data.push({uname: result[i].name, ename: result[i].exp_name, gname: group_name, color: "red", date:result[i].date, amount:result[i].amt, share:result[i].share})
+                        }
+                    }
+                    res.writeHead(200,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    const finaldata = {expense: expense_data}
+                    console.log(finaldata)
+                    res.end(JSON.stringify(finaldata))
+                }
+                else {
+                    console.log(err)
+                    res.writeHead(204,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("Issue with data base")
+                }
+            })
+        }
+        else {
+            console.log(err)
+            res.writeHead(204,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Issue with data base")
+        }
+    })
+})
+
+app.post('/getDash', function(req,res){
+    console.log("All Okay Here")
+    const id = get_id(req.body.token)
+    if (id === null){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
+    let ledger = new Object();
+    const sqlQuery = `SELECT T1.borrow_id as bid, T1.expense_name as ename, T1.expense as amt, T2.fname AS fname 
+                    FROM iExpense AS T1 LEFT JOIN userInfo AS T2 ON T1.borrow_id = T2.id
+                    WHERE T1.lender_id=${id};`
+    console.log(sqlQuery)
+    db.query(sqlQuery, (err, result, fields) => {
+        if (!err){
+            for (let i in result){
+                if (result[i].bid in ledger) {
+                    ledger[result[i].bid].push({color:"green", expense: result[i].amt, person: result[i].fname, ename: result[i].ename})
+                }
+                else{
+                    ledger[result[i].bid] = []
+                    ledger[result[i].bid].push({color:"green", expense: result[i].amt, person: result[i].fname, ename: result[i].ename})
+                }
+            }
+            const sqlQuery = `SELECT T1.lender_id as lid, T1.expense_name as ename, T1.expense as amt, T2.fname AS fname 
+                    FROM iExpense AS T1 LEFT JOIN userInfo AS T2 ON T1.lender_id = T2.id
+                    WHERE T1.borrow_id=${id};`
+            db.query(sqlQuery, (err, result, fields) => {
+                if (!err){
+                    for (let i in result){
+                        if (result[i].lid in ledger) {
+                            ledger[result[i].lid].push({color:"red", expense: result[i].amt, person: result[i].fname, ename: result[i].ename})
+                        }
+                        else{
+                            ledger[result[i].lid] = []
+                            ledger[result[i].lid].push({color:"red", expense: result[i].amt, person: result[i].fname, ename: result[i].ename})
+                        }
+                    }
+                    const final_data = {accounts: ledger}
+                    res.writeHead(200,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end(JSON.stringify(final_data))
+                }
+                else{
+                    console.log(err)
+                    res.writeHead(204,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("Issue with data base")
+                }
+            })
+        }
+        else {
+            console.log(err)
+            res.writeHead(204,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Issue with data base")
+        }
+    })
+})
+
+app.get('/groupSuggest',function(req,res) {
+    console.log(req.header)
+    const id = get_id(req.header.token)
+    const sqlQuery = `SELECT email AS em FROM userInfo;`
+    let list = [];
+    db.query(sqlQuery, (err, result) => {
+        if (!err){
+            for (let i in result){
+                list.push(result[i].em)
+            }
+            res.writeHead(200,{
+                'Content-Type' : 'text/plain'
+            })
+            const final_data = {list: list}
+            res.end(JSON.stringify(final_data));    
+        }
+        else {
+            console.log(err)
+            res.writeHead(204,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Issue with data base")
+        }
+    })
+})
+
 app.listen(3001, () => {
     console.log("listening on port 3001")
 })

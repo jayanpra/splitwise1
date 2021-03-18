@@ -1,8 +1,8 @@
 import React from 'react'
-import {Card,Button} from 'react-bootstrap'
+import {Card, Form} from 'react-bootstrap'
 import logo from '../landing/splitwise_logo.png'
 
-const ProfileImage = () => {
+const ProfileImage = ({onChange}) => {
     return (
         <div>
             <Card style={{ width: '18rem' }}>
@@ -10,7 +10,13 @@ const ProfileImage = () => {
                 <Card.Body>
                     <Card.Title>Hi </Card.Title>
                     <Card.Text>Create your own avatar</Card.Text>
-                    <Button variant="primary">add your Image</Button>
+                    <Form>
+                        <Form.File 
+                            id="custom-file"
+                            label="Add"
+                            custom
+                            onChange={(event) => onChange(event.target.files[0] || null)}/>
+                        </Form>
                 </Card.Body>
             </Card>
             

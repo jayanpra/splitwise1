@@ -1,6 +1,7 @@
-import {useState,} from 'react'
+import {useState,useEffect} from 'react'
+import useAutocomplete from 'use-autocomplete' 
 import ProfileImage from "../profile/profileImage"
-import {Row,Col,Container, Button}  from 'react-bootstrap'
+import {Row,Col, Button}  from 'react-bootstrap'
 import Navigator from '../landing/Navigator'
 import GroupSide from '../common/GroupSide'
 import { MDBInput,MDBTypography } from "mdbreact";
@@ -10,7 +11,10 @@ import { Redirect } from 'react-router-dom'
 
 const GroupCreate = () => {
     const [groupMem, changeMember] = useState({members: [], group_member_no: [1], refresh: false})
-
+    const [suggestion, suggest] = useState([])
+    const [init, over] = useState(true)
+    const [textState, setTextState] = useState('');
+    let [completions] = useAutocomplete(textState, suggestion);
     const addField = (e) => {
         groupMem.group_member_no.push(groupMem.group_member_no.length + 1)
         changeMember({
@@ -18,6 +22,27 @@ const GroupCreate = () => {
             refresh: !groupMem.refresh
         })
     }
+
+    useEffect (() => {
+        if (init) {
+            const token = {token: localStorage.getItem('token')}
+            axios.get('http://localhost:3001/groupSuggest', { headers: {"token": `${token}`} } )
+            .then((response) => {
+                console.log("Sucessful")
+                if (response.status === 200) {
+                    suggest([...response.data.list])
+                    over(false)
+                }
+                else {
+                    console.log(response)
+                    over(false)
+                }
+            })
+            .then((response) => {
+                return <Redirect to='/landing'/>
+            }); 
+        }
+    })
 
     const onSubmit = () => {
         let data = {
@@ -63,7 +88,12 @@ const GroupCreate = () => {
                     <MDBTypography tag='h5' variant="h5" style={{textAlign:'left'}}>Your Group Members ?</MDBTypography>
                     {
                         groupMem.group_member_no.map((option) => (
-                            <Row><MDBInput label="Name/Email" size="sm" icon="user" id={option}/>
+                            <Row><MDBInput label="Name/Email" size="sm" icon="user" id={option} onChange={(e) => setTextState(e.target.value)}/>
+                            <div>
+                                {completions.map((val, index) => (
+                                <p key={index}>{val}</p>
+                                            ))}
+                            </div>  
                             </Row>
                         ))
                     }
