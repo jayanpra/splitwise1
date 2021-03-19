@@ -16,11 +16,18 @@ app.use( bodyParser.urlencoded( { extended: false } ) );
 app.use(express.static(path.resolve('./public')));
 
 const db = mysql.createPool({
-    host: "localhost",
-    user: "root",
+    host: "database-2.copvz5nsdbwv.us-west-2.rds.amazonaws.com",
+    user: "admin",
     password: "password",
     database: "splitwiseStorage"
 })
+
+// const db = mysql.createPool({
+//     host: "localhost",
+//     user: "root",
+//     password: "password",
+//     database: "splitwiseStorage"
+// })
 const get_id = (token) => {
     if (!token){
         return null;
@@ -746,9 +753,7 @@ app.post('/imageupdate', function(req,res) {
     if (req.files === null) {
         return res.status(400).send('No File Upload');
     }
-
     const file = req.files.profileImage;
-    //Get the userID,file name from frontend
     var x = req.files.profileImage.name.split(',')[1];
     const userID = get_id(x);
     const fileName = req.files.profileImage.name.split(',')[0];
@@ -758,18 +763,16 @@ app.post('/imageupdate', function(req,res) {
     const filePathwithoutfileName = pathToImage + '/images/profilepics/' + userID;
     console.log(filePathwithoutfileName);
     const filePath = pathToImage + '/images/profilepics/' + userID + '/' + fileName;
-    //Create a file with that path
+
     if (!fs.existsSync(filePathwithoutfileName)) {
         fs.mkdirSync(filePathwithoutfileName);
     }
-    //Move the image to that path
     file.mv(filePath, err => {
         if (err) {
             return res.status(500).end(err);
         }
         else {
-            //Update the image path in the database
-            var sql = `update userinfo set image='${fileName}' where id=${userID}`;
+            var sql = `UPDATE userInfo SET image='${fileName}' WHERE id=${userID}`;
             db.query(sql, (err, results) => {
                 if (err) {
                     console.log(err);
@@ -778,7 +781,6 @@ app.post('/imageupdate', function(req,res) {
             });
         }
     })
-    //Send the file name and file path to the client
     res.json({
         fileName: fileName,
         filePath: filePath

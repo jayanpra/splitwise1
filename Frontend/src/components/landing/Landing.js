@@ -1,4 +1,3 @@
-import "bootstrap/dist/css/bootstrap.min.css"
 import Navigator from './Navigator'
 import LandingBody from './LandingBody'
 import { Redirect } from "react-router-dom";
