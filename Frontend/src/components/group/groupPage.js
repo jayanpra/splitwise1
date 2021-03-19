@@ -9,6 +9,7 @@ import AddExpense from '../common/AddExpense'
 import { Redirect } from 'react-router-dom';
 import {FaCheck} from "react-icons/fa";
 
+
 const GroupPage = () => {
     const [data, setData] = useState({
         name: null,
@@ -22,6 +23,10 @@ const GroupPage = () => {
     const [group_req, getReq] = useState([])
     const [show_req, toggleShow] = useState(false)
     const [delayed, noSession] = useState(false)
+
+    const LogOut = () => {
+        noSession(true)
+    }
 
     useEffect(() => {
         if (data.name === null) {
@@ -53,7 +58,7 @@ const GroupPage = () => {
             noSession(true)
           }
         }
-    });
+    },[data]);
 
     const showAddExpense = () => {
         setToggle(!expTog)
@@ -111,8 +116,30 @@ const GroupPage = () => {
                 }
               })
             .then((response) => {
+            }); 
+    }
+
+    const exitGroup = (gname) => {
+        let gid;
+        for(let i in data.groups){
+            if (data.groups[i].name === gname){
+                gid = data.groups[i].id
             }
-        ); 
+        }
+        const serverData = { token: localStorage.getItem('token'), group_id: gid };
+        axios.post('http://localhost:3001/groupExit', serverData)
+            .then((response) => {
+                if (response.status === 200) {
+                    if (response.data.message === "Group Not Settled"){
+                        
+                    }
+                    else if (response.data.message === "Group Settled"){
+                        setData({...data, name:null})
+                    }
+                }
+              })
+            .then((response) => {
+            }); 
     }
 
     return (
@@ -127,10 +154,10 @@ const GroupPage = () => {
             </MDBContainer></Row>
             <Row>
                 <Col sm={2}>
-                    <GroupSide groupname={data.group_name} launchExpense={showAddExpense} changeGroup={changeGroup}/>
+                    <GroupSide LogOut={LogOut} groupname={data.group_name} launchExpense={showAddExpense} changeGroup={changeGroup}/>
                 </Col>
                 <Col sm={7}>
-                    <GroupBody name={data.name} expense_list={data.selected_group}/>
+                    <GroupBody name={data.name} expense_list={data.selected_group} exitGroup={exitGroup}/>
                 </Col>
                 <Col sm={3}>
                     <Row>

@@ -2,11 +2,13 @@ import React from 'react'
 import {Card, Form} from 'react-bootstrap'
 import logo from '../landing/splitwise_logo.png'
 
-const ProfileImage = ({onChange}) => {
+const ProfileImage = ({pic, onImageChange}) => {
+    import 
     return (
         <div>
             <Card style={{ width: '18rem' }}>
-                <Card.Img variant="top" src={logo} />
+                {pic ? <Card.Img variant="top" src={pic} /> : <Card.Img variant="top" src={logo}/>}
+                
                 <Card.Body>
                     <Card.Title>Hi </Card.Title>
                     <Card.Text>Create your own avatar</Card.Text>
@@ -15,7 +17,7 @@ const ProfileImage = ({onChange}) => {
                             id="custom-file"
                             label="Add"
                             custom
-                            onChange={(event) => onChange(event.target.files[0] || null)}/>
+                            onChange={onImageChange}/>
                         </Form>
                 </Card.Body>
             </Card>

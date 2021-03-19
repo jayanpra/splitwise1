@@ -30,6 +30,10 @@ const Dashboard = () => {
         }
     }
 
+    const LogOut = () => {
+        noSession(true)
+    }
+
     const settleUp = () => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -87,7 +91,7 @@ const Dashboard = () => {
                 noSession(true)
             }
         }
-    })
+    },[initial_pull, friends])
     return (
         <div>
             {delayed ? <Redirect to='/landing'/>: null}
@@ -99,7 +103,7 @@ const Dashboard = () => {
             </MDBContainer></Row>
             <Row>
                 <Col sm={3}>
-                    <GroupSide />
+                    <GroupSide LogOut={LogOut} />
                 </Col>
                 <Col sm={6}>
                 <MDBRow>

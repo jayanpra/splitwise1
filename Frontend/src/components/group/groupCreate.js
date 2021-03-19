@@ -24,6 +24,9 @@ const GroupCreate = () => {
             refresh: !groupMem.refresh
         })
     }
+    const LogOut = () => {
+        noSession(true)
+    }
 
     useEffect (() => {
         if (init) {
@@ -44,10 +47,10 @@ const GroupCreate = () => {
                 }
             })
             .then((response) => {
-                return <Redirect to='/landing'/>
+                noSession(true)
             }); 
         }
-    })
+    }, [init])
 
     const onSubmit = () => {
         let data = {
@@ -70,7 +73,7 @@ const GroupCreate = () => {
             }
           })
           .then((response) => {
-            return <Redirect to='/landing'/>
+            noSession(true)
           }); 
     }
 
@@ -80,7 +83,7 @@ const GroupCreate = () => {
             <Navigator loggedin={true}/>
             <Row style={{marginTop:"100px"}}> 
                 <Col sm={2}>
-                <GroupSide/>
+                <GroupSide LogOut={LogOut}/>
                 </Col>
                 <Col sm={1}></Col>
                 <Col sm={4}>

@@ -34,7 +34,7 @@ const Recent = () => {
                 noSession(true)
             }
         }
-    })
+    },[initial_pull])
 
     const changeOrder = () => {
         console.log("Change Started")

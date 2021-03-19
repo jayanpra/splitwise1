@@ -40,6 +40,7 @@ const Register = () => {
     
     return (
         <div>
+            {clickstate === "login" ? <Redirect to='/login'/> : null }
             <Navigator onClickLogin={onClickLogin}/>
             <SignupForms onClick={on_submit_form}/>
         </div>

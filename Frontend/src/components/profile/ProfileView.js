@@ -3,14 +3,15 @@ import {Container, Row, Col} from 'react-bootstrap'
 import ProfileImage from './profileImage'
 import ToggleBox from '../common/ToggleBox'
 
-const ProfileView = ({para, onChange}) => {
+const ProfileView = ({para, onChange,onImageChange}) => {
     //console.log(para.para.name," is Para")
+    
     return (
         <div>
             <Container>
                 <Row>
                     <Col>
-                        <ProfileImage/>
+                        <ProfileImage pic ={para.pic} onImageChange={onImageChange}/>
                     </Col>
                     <Col>
                         <Container style={{'height':'80px'}}>

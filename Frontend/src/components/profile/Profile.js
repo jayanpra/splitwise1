@@ -7,6 +7,8 @@ import ProfileView from './ProfileView';
 import ProfileMetric from './profileMetric';
 import GroupSide from '../common/GroupSide';
 import AddExpense from '../common/AddExpense';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Profile = () => {
   const currency = ['USD', 'KWD', 'BHD', 'GBP', 'EUR', 'CAD'];
@@ -48,6 +50,11 @@ const Profile = () => {
 
   const [expTog, setToggle] = useState(false)
   const [delayed, noSession] = useState(false)
+  const notify = (message) => toast(`${message} changed sucessfully!`);
+  
+  const LogOut = () => {
+    noSession(true)
+  }
 
   useEffect(() => {
     if (data.name === null) {
@@ -60,16 +67,18 @@ const Profile = () => {
             if (response.status === 200) {
               localStorage.setItem("currency", response.data.currency)
               localStorage.setItem("fname", response.data.name.split( )[0])
+              console.log(response.data)
               setData(
                 {
                   name: response.data.name,
                   email: response.data.email,
                   phone: response.data.phone,
+                  pic: "http://localhost:3001/images/profilepics/50/"+response.data.pic,
                   currency: response.data.currency,
                   timezone: response.data.timezone,
                   language: response.data.language,
                   image: response.data.image,
-                },
+                }
               );
             }
           })
@@ -81,7 +90,7 @@ const Profile = () => {
         noSession(true)
       }
     }
-  });
+  },[data]);
 
   const update_local_info = (value, key) => {
     switch (key) {
@@ -118,6 +127,29 @@ const Profile = () => {
         break;
     }
   }
+  const onImageChange = (event) => {
+    const formData = new FormData();
+    console.log(event.target.files[0]);
+    formData.append('profileImage',event.target.files[0],event.target.files[0].name + ',' + localStorage.getItem('token'));
+    const config = {
+      headers: { 
+        'content-type': 'multipart/form-data'
+      }
+    }
+    console.log("hwrerere")
+    for (var value of formData.values()) {
+        console.log(value);
+    }
+    axios.post('http://localhost:3001/imageupdate',formData,config )
+      .then((response) => {
+        if (response.status === 200) {
+          console.log("Records Saved")
+        }
+      })
+      .then((response) => {
+          console.log("DataBase Issue")
+      }); 
+  }
   const onProfileChange = (value) => {
     const pckg = {token:localStorage.getItem('token'), data: value}
     axios.defaults.withCredentials = true;
@@ -126,6 +158,7 @@ const Profile = () => {
         if (response.status === 200) {
           console.log("Records Saved")
           update_local_info(value.value, value.type)
+          notify(value.type)
         }
       })
       .then((response) => {
@@ -138,14 +171,15 @@ const Profile = () => {
   return (
     <div>
         {delayed ? <Redirect to='/landing'/>: null}
+        <ToastContainer />
         <AddExpense open={expTog} onToggle={showAddExpense}/>
         <Navigator loggedin={true}/>
             <Row style={{marginTop:"100px"}}> 
                 <Col sm={2}>
-                <GroupSide launchExpense={showAddExpense}/>
+                <GroupSide LogOut={LogOut} launchExpense={showAddExpense}/>
                 </Col>
                 <Col sm={6}>
-                    <ProfileView para={data} onChange={onProfileChange}/>
+                    <ProfileView onImageChange={onImageChange} para={data} onChange={onProfileChange}/>
                 </Col>
                 <Col sm={3}>
                     <Row>

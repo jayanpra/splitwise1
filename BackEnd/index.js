@@ -4,11 +4,16 @@ const app = express();
 const cors = require('cors')
 const bodyParser = require('body-parser');
 const hashFunction = require('password-hash');
+const fileUpload = require('express-fileupload');
 const jwtoken= require('jsonwebtoken');
-
+const path = require('path');
+const fs = require('fs');
 app.set('view engine', 'ejs');
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(bodyParser.json());
+app.use(fileUpload());
+app.use( bodyParser.urlencoded( { extended: false } ) );
+app.use(express.static(path.resolve('./public')));
 
 const db = mysql.createPool({
     host: "localhost",
@@ -103,10 +108,18 @@ app.post('/profile/initialPull', function(req,res){
             res.writeHead(200,{
                 'Content-Type' : 'text/plain'
             })
+            let pic_path;
+            if (result[0].image!=null) {
+                pic_path = "/images/profilepics/"+ id + "/"+result[0].image
+            }
+            else{
+                pic_path=null
+            }
             const endData = {auth:true, 
                 name: result[0].fname + " " + result[0].lname,
                 email: result[0].email,
                 phone: result[0].phone,
+                pic : pic_path, 
                 currency: result[0].currency,
                 timezone: result[0].timezone,
                 language: result[0].language,
@@ -659,6 +672,107 @@ app.get('/groupSuggest',function(req,res) {
     })
 })
 
+app.post('/groupExit',function(req,res) {
+    const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
+    console.log(req.body)
+    const group_id = req.body.group_id;
+    let sqlQuery = `Select * FROM iExpense WHERE group_id = ${group_id} OR group_id = 0`
+    db.query(sqlQuery, (err, result) => {
+        if (!err){
+            let balance = 0.0
+            for (let i in result){
+                if (result[i].lender_id === result[i].borrow_id){
+                    continue
+                }
+                if (result[i].lender_id === id){
+                    balance =  balance + result[i].expense
+                }
+                else if (result[i].borrow_id === id){
+                    balance = balance - result[i].expense
+                }
+            }
+            if (balance < 0){
+                balance = balance * -1
+            }
+            if (balance > 0.01){
+                const data = {message: "Group Not Settled"}
+                res.writeHead(200,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end(JSON.stringify(data));
+            }
+            else {
+                sqlQuery = `DELETE FROM groupMem WHERE group_id = ${group_id} AND member_id = ${id}`
+                db.query(sqlQuery, (err, result) => {
+                    if (!err){
+                        const data = {message: "Group Settled"}
+                        res.writeHead(200,{
+                            'Content-Type' : 'text/plain'
+                        })
+                        res.end(JSON.stringify(data));
+                    }
+                });
+            }   
+        }
+        else {
+            console.log(err)
+            res.writeHead(204,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Issue with data base")
+        }
+    })
+})
+
 app.listen(3001, () => {
     console.log("listening on port 3001")
 })
+app.post('/imageupdate', function(req,res) {
+    if (req.files === null) {
+        return res.status(400).send('No File Upload');
+    }
+
+    const file = req.files.profileImage;
+    //Get the userID,file name from frontend
+    var x = req.files.profileImage.name.split(',')[1];
+    const userID = get_id(x);
+    const fileName = req.files.profileImage.name.split(',')[0];
+    console.log(__dirname);
+    var pathToImage = path.join(__dirname, './public');
+
+    const filePathwithoutfileName = pathToImage + '/images/profilepics/' + userID;
+    console.log(filePathwithoutfileName);
+    const filePath = pathToImage + '/images/profilepics/' + userID + '/' + fileName;
+    //Create a file with that path
+    if (!fs.existsSync(filePathwithoutfileName)) {
+        fs.mkdirSync(filePathwithoutfileName);
+    }
+    //Move the image to that path
+    file.mv(filePath, err => {
+        if (err) {
+            return res.status(500).end(err);
+        }
+        else {
+            //Update the image path in the database
+            var sql = `update userinfo set image='${fileName}' where id=${userID}`;
+            db.query(sql, (err, results) => {
+                if (err) {
+                    console.log(err);
+                    res.status(400).end("Error:", err);
+                }
+            });
+        }
+    })
+    //Send the file name and file path to the client
+    res.json({
+        fileName: fileName,
+        filePath: filePath
+    })
+});

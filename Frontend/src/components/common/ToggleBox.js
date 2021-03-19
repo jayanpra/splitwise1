@@ -1,12 +1,12 @@
 import {useState} from 'react'
 import {InputGroup, FormControl} from 'react-bootstrap'
-import { FaEdit, FaCheck} from "react-icons/fa";
+import { FaEdit, FaCheck, FaTimes} from "react-icons/fa";
 
 const ToggleBox = ({heading, value, onChange}) => {
     const [editmode, changeEdit] = useState(false)
     const [changeValue, onChangeValue] = useState('')
     const onEdit = () => {
-        changeEdit(true)
+        changeEdit(!editmode)
     }
     const inputChange = (e) => {
         onChangeValue(e.target.value)
@@ -24,6 +24,7 @@ const ToggleBox = ({heading, value, onChange}) => {
                     placeholder={heading.toLowerCase()}
                     onChange={inputChange} />
                     <FaCheck style={{color: 'green', cursor: 'pointer'}} onClick={() => onChangeX()}/>
+                    <FaTimes style={{color: 'Red', cursor: 'pointer'}} onClick={() => onEdit()}/>
                 </InputGroup>
                 </div>:
                 <div> 
