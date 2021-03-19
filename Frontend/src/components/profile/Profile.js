@@ -73,7 +73,7 @@ const Profile = () => {
                   name: response.data.name,
                   email: response.data.email,
                   phone: response.data.phone,
-                  pic: "http://localhost:3001/images/profilepics/50/"+response.data.pic,
+                  pic: "http://localhost:3001/"+response.data.pic,
                   currency: response.data.currency,
                   timezone: response.data.timezone,
                   language: response.data.language,
@@ -136,7 +136,6 @@ const Profile = () => {
         'content-type': 'multipart/form-data'
       }
     }
-    console.log("hwrerere")
     for (var value of formData.values()) {
         console.log(value);
     }

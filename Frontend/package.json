@@ -9,6 +9,7 @@
     "axios": "^0.21.1",
     "mdbreact": "^5.0.1",
     "react": "^17.0.1",
+    "react-autocomplete-hint": "^1.2.3",
     "react-bootstrap": "^1.5.1",
     "react-dom": "^17.0.1",
     "react-icons": "^4.2.0",

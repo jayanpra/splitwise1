@@ -8,16 +8,19 @@ import { MDBInput,MDBTypography } from "mdbreact";
 import { BsFillPersonPlusFill } from "react-icons/bs";
 import axios from 'axios';
 import { Redirect } from 'react-router-dom'
+import {Hint}  from 'react-autocomplete-hint'
 
 const GroupCreate = () => {
     const [groupMem, changeMember] = useState({members: [], group_member_no: [1], refresh: false})
     const [suggestion, suggest] = useState([])
     const [init, over] = useState(true)
-    const [textState, setTextState] = useState('')
+    const [textState, setTextState] = useState({})
     const [delayed, noSession] = useState(false)
+    const [group,gReturn] = useState(false)
 
-    let [completions] = useAutocomplete(textState, suggestion);
+
     const addField = (e) => {
+        console.log("Collections :", suggestion)
         groupMem.group_member_no.push(groupMem.group_member_no.length + 1)
         changeMember({
             ...groupMem,
@@ -34,8 +37,9 @@ const GroupCreate = () => {
             if (!token){
                 noSession(true)
             }
-            axios.get('http://localhost:3001/groupSuggest', { headers: {"token": `${token}`} } )
+            axios.post('http://localhost:3001/groupSuggest', { headers: {"token": `${token}`} } )
             .then((response) => {
+                console.log(response.data)
                 console.log("Sucessful")
                 if (response.status === 200) {
                     suggest([...response.data.list])
@@ -47,7 +51,6 @@ const GroupCreate = () => {
                 }
             })
             .then((response) => {
-                noSession(true)
             }); 
         }
     }, [init])
@@ -65,20 +68,19 @@ const GroupCreate = () => {
           .then((response) => {
             console.log("Sucessful")
             if (response.status === 200) {
-
-              return <Redirect to='/group'/>
+                gReturn(true)
             }
             else {
                 console.log(response)
             }
           })
           .then((response) => {
-            noSession(true)
           }); 
     }
 
     return (
         <div>
+            {group ? <Redirect to='/group'/>: null}
             {delayed ? <Redirect to='/landing'/>: null}
             <Navigator loggedin={true}/>
             <Row style={{marginTop:"100px"}}> 
@@ -97,12 +99,13 @@ const GroupCreate = () => {
                     <MDBTypography tag='h5' variant="h5" style={{textAlign:'left'}}>Your Group Members ?</MDBTypography>
                     {
                         groupMem.group_member_no.map((option) => (
-                            <Row><MDBInput label="Name/Email" size="sm" icon="user" id={option} onChange={(e) => setTextState(e.target.value)}/>
-                            <div>
-                                {completions.map((val, index) => (
-                                <p key={index}>{val}</p>
-                                            ))}
-                            </div>  
+                            <Row>
+                                <Col sm={{ span: 5, offset: 3 }} >
+                                <Hint options={suggestion} allowTabFill>
+                                <input style={{ width: '300px' }} value={textState[option]} id={option} onChange={e => setTextState({...textState, option : e.target.value})}/>
+                                </Hint>
+                                </Col>
+                            <br/><br/>
                             </Row>
                         ))
                     }

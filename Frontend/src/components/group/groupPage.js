@@ -8,6 +8,8 @@ import axios from 'axios';
 import AddExpense from '../common/AddExpense'
 import { Redirect } from 'react-router-dom';
 import {FaCheck} from "react-icons/fa";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const GroupPage = () => {
@@ -23,6 +25,7 @@ const GroupPage = () => {
     const [group_req, getReq] = useState([])
     const [show_req, toggleShow] = useState(false)
     const [delayed, noSession] = useState(false)
+    const notify = (message) => toast(message);
 
     const LogOut = () => {
         noSession(true)
@@ -48,7 +51,9 @@ const GroupPage = () => {
                       group_name: [...group_data],
                     });
                 }
-                console.log(data);
+                else {
+                    console.log(response)
+                }
               })
               .then((response) => {
                 console.log(response)
@@ -93,6 +98,7 @@ const GroupPage = () => {
                 toggleShow(false)
               })
             .then((response) => {
+                
             }); 
     }
 
@@ -131,7 +137,7 @@ const GroupPage = () => {
             .then((response) => {
                 if (response.status === 200) {
                     if (response.data.message === "Group Not Settled"){
-                        
+                        notify("In a hurry to leave this group settle up first")
                     }
                     else if (response.data.message === "Group Settled"){
                         setData({...data, name:null})
@@ -144,6 +150,7 @@ const GroupPage = () => {
 
     return (
         <div>
+            <ToastContainer />
             {delayed ? <Redirect to='/landing'/>: null}
             <AddExpense open={expTog} onToggle={showAddExpense}/>
             <Navigator loggedin={true}/>
@@ -159,7 +166,7 @@ const GroupPage = () => {
                 <Col sm={7}>
                     <GroupBody name={data.name} expense_list={data.selected_group} exitGroup={exitGroup}/>
                 </Col>
-                <Col sm={3}>
+                <Col sm={{ span: 2, offset:0 }}>
                     <Row>
                         {show_req ? group_req.map((req) => <MDBContainer>
                             <MDBCard><MDBCardBody>{req}

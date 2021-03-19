@@ -14,7 +14,6 @@ const Dashboard = () => {
     const [amt_plus, addMoney] = useState(0.0)
     const [amt_minus, subMoney] = useState(0.0)
     const [friends, indSettle] = useState({})
-    const [fin_balance, finAcc] = useState(0.0)
     const [delayed, noSession] = useState(false)
 
     const assess_record = (ele, list) => {
@@ -39,14 +38,14 @@ const Dashboard = () => {
         if (token) {
             const serverData = { 'token': token, settle: friends.settle };
             axios.defaults.withCredentials = true;
-            axios.post('http://localhost:3001/profile/initialPull', serverData)
+            axios.post('http://localhost:3001/settleUp', serverData)
             .then((response) => {
                 if (response.status === 200) {
                     pullExit(true)
                 }
             })
             .then((response) => {
-                noSession(true)
+                
             }); 
         }
         else {
@@ -79,7 +78,6 @@ const Dashboard = () => {
                             else {
                                 subMoney((balance) => balance + (response.data.balance[keys2[j]] * -1))
                             }
-                            finAcc((balance) => balance + response.data.balance[keys2[j]])
                         }
                     }
                 })
@@ -91,7 +89,7 @@ const Dashboard = () => {
                 noSession(true)
             }
         }
-    },[initial_pull, friends])
+    },[initial_pull])
     return (
         <div>
             {delayed ? <Redirect to='/landing'/>: null}
@@ -116,11 +114,11 @@ const Dashboard = () => {
                                 <MDBRow>
                                     <MDBCol>
                                         <p>Total Balance</p>
-                                        {fin_balance >= 0 ? <p style={{color:"green"}}>
-                                            {localStorage.getItem("currency")} {fin_balance}
+                                        {(amt_plus - amt_minus) >= 0 ? <p style={{color:"green"}}>
+                                            {localStorage.getItem("currency")} {(amt_plus - amt_minus).toFixed(2)}
                                         </p>:
                                         <p style={{color:"red"}}>
-                                            {localStorage.getItem("currency")} {fin_balance.toFixed(2)}
+                                            {localStorage.getItem("currency")} {(amt_plus - amt_minus).toFixed(2)}
                                         </p>
                                         }   
                                     </MDBCol>

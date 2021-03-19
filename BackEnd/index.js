@@ -93,7 +93,7 @@ app.post('/register',function(req,res) {
 app.post('/profile/initialPull', function(req,res){
     const id = get_id(req.body.token)
     if (!id){
-        res.writeHead(204,{
+        res.writeHead(203,{
             'Content-Type' : 'text/plain'
         })
         res.end("Token has expired")
@@ -122,8 +122,7 @@ app.post('/profile/initialPull', function(req,res){
                 pic : pic_path, 
                 currency: result[0].currency,
                 timezone: result[0].timezone,
-                language: result[0].language,
-                image: result[0].image}
+                language: result[0].language}
             res.end(JSON.stringify(endData));    
         }
         else {
@@ -138,6 +137,13 @@ app.post('/profile/initialPull', function(req,res){
 
 app.post('/profile/update', function(req,res){
     const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(203,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
     const sqlQuery = `UPDATE userInfo SET ${req.body.data.type} = \'${req.body.data.value}\' WHERE id=${id};`
     console.log(sqlQuery)
     db.query(sqlQuery, (err, result, fields) => {
@@ -161,7 +167,7 @@ app.post('/profile/update', function(req,res){
 app.post('/groupCreate', function(req,res){
     const id = get_id(req.body.token)
     if (!id){
-        res.writeHead(204,{
+        res.writeHead(203,{
             'Content-Type' : 'text/plain'
         })
         res.end("Token has expired")
@@ -259,7 +265,7 @@ app.post('/login', function(req,res) {
 app.post('/groupFill', function(req,res) {
     const id = get_id(req.body.token)
     if (!id){
-        res.writeHead(204,{
+        res.writeHead(203,{
             'Content-Type' : 'text/plain'
         })
         res.end("Token has expired")
@@ -274,6 +280,15 @@ app.post('/groupFill', function(req,res) {
         if (!err){
             for (let i in result) {
                 group_list.push({name:result[i].name, id:result[i].gid, active: result[i].act})
+            }
+            if (group_list.length === 0){
+                const finaldata = {group:[], expense: []}
+                    res.writeHead(200,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    console.log(finaldata)
+                    res.end(JSON.stringify(finaldata))
+                    return
             }
             let sqlQuery = `SELECT T1.date AS date, T1.expense_name as exp_name, T1.shares AS share, T2.id as pid, T2.fname AS fname, T1.amount as amount FROM gExpense AS T1 LEFT JOIN userInfo AS T2 ON  T1.payee_id = T2.id WHERE T1.group_id = ${group_list[0].id};`
             db.query(sqlQuery, (err, result) => {
@@ -316,7 +331,7 @@ app.post('/groupFill', function(req,res) {
 app.post('/altergroup',function(req,res) {
     const id = get_id(req.body.token)
     if (!id){
-        res.writeHead(204,{
+        res.writeHead(203,{
             'Content-Type' : 'text/plain'
         })
         res.end("Token has expired")
@@ -346,7 +361,7 @@ app.post('/altergroup',function(req,res) {
 app.post('/expenseAdd',function(req,res) {
     const id = get_id(req.body.token)
     if (!id){
-        res.writeHead(204,{
+        res.writeHead(203,{
             'Content-Type' : 'text/plain'
         })
         res.end("Token has expired")
@@ -417,7 +432,7 @@ app.post('/expenseAdd',function(req,res) {
 app.post('/groupChange',function(req,res) {
     const id = get_id(req.body.token)
     if (!id){
-        res.writeHead(204,{
+        res.writeHead(203,{
             'Content-Type' : 'text/plain'
         })
         res.end("Token has expired")
@@ -456,7 +471,7 @@ app.post('/groupChange',function(req,res) {
 app.post('/pullRecent', function(req,res){
     const id = get_id(req.body.token)
     if (!id){
-        res.writeHead(204,{
+        res.writeHead(203,{
             'Content-Type' : 'text/plain'
         })
         res.end("Token has expired")
@@ -529,7 +544,7 @@ app.post('/getDash', function(req,res){
     console.log("All Okay Here")
     const id = get_id(req.body.token)
     if (!id){
-        res.writeHead(204,{
+        res.writeHead(203,{
             'Content-Type' : 'text/plain'
         })
         res.end("Token has expired")
@@ -601,7 +616,7 @@ app.post('/getDash', function(req,res){
 app.post('/settleUp', function(req,res){
     const id = get_id(req.body.token)
     if (!id){
-        res.writeHead(204,{
+        res.writeHead(203,{
             'Content-Type' : 'text/plain'
         })
         res.end("Token has expired")
@@ -639,26 +654,19 @@ app.post('/settleUp', function(req,res){
     })
 })
 
-app.get('/groupSuggest',function(req,res) {
-    console.log(req.header)
-    const id = get_id(req.header.token)
-    if (!id){
-        res.writeHead(204,{
-            'Content-Type' : 'text/plain'
-        })
-        res.end("Token has expired")
-        return
-    }
+app.post('/groupSuggest',function(req,res) {
     const sqlQuery = `SELECT email AS em FROM userInfo;`
     let list = [];
     db.query(sqlQuery, (err, result) => {
         if (!err){
+            console.log("Result, ")
             for (let i in result){
                 list.push(result[i].em)
             }
             res.writeHead(200,{
                 'Content-Type' : 'text/plain'
             })
+            console.log(list)
             const final_data = {list: list}
             res.end(JSON.stringify(final_data));    
         }
