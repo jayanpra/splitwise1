@@ -24,7 +24,7 @@ const Login = () => {
             password: password
         }
         axios.defaults.withCredentials = true;
-        axios.post('http://localhost:3001/login',data)
+        axios.post('http://52.41.87.175:3001/login',data)
         .then(response => {
             console.log("Status Code :",response.status);
             if(response.status === 200){
