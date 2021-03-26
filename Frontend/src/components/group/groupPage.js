@@ -37,7 +37,7 @@ const GroupPage = () => {
           if (token) {
             const serverData = { 'token': token };
             axios.defaults.withCredentials = true;
-            axios.post('http://52.41.87.175:3001/groupFill', serverData)
+            axios.post('http://localhost:3001/groupFill', serverData)
               .then((response) => {
                 if (response.status === 200) {
                     let group_data = []
@@ -90,7 +90,7 @@ const GroupPage = () => {
         console.log("name is ", name)
         const serverData = { token: localStorage.getItem('token'), group_id: gid };
         axios.defaults.withCredentials = true;
-        axios.post('http://52.41.87.175:3001/altergroup', serverData)
+        axios.post('http://localhost:3001/altergroup', serverData)
             .then((response) => {
                 if (response.status === 200) {
                     data.groups[id].active = "active"
@@ -111,7 +111,7 @@ const GroupPage = () => {
         }
         console.log("gname ", gname, gid)
         const serverData = { token: localStorage.getItem('token'), group_id: gid };
-        axios.post('http://52.41.87.175:3001/groupChange', serverData)
+        axios.post('http://localhost:3001/groupChange', serverData)
             .then((response) => {
                 if (response.status === 200) {
                     setData({
@@ -133,7 +133,7 @@ const GroupPage = () => {
             }
         }
         const serverData = { token: localStorage.getItem('token'), group_id: gid };
-        axios.post('http://52.41.87.175:3001/groupExit', serverData)
+        axios.post('http://localhost:3001/groupExit', serverData)
             .then((response) => {
                 if (response.status === 200) {
                     if (response.data.message === "Group Not Settled"){

@@ -37,7 +37,7 @@ const GroupCreate = () => {
             if (!token){
                 noSession(true)
             }
-            axios.post('http://52.41.87.175:3001/groupSuggest', { headers: {"token": `${token}`} } )
+            axios.post('http://localhost:3001/groupSuggest', { headers: {"token": `${token}`} } )
             .then((response) => {
                 console.log(response.data)
                 console.log("Sucessful")
@@ -64,7 +64,7 @@ const GroupCreate = () => {
         for (let i in groupMem.group_member_no) {
             data.group_members.push(document.getElementById(groupMem.group_member_no[i]).value)
         }
-        axios.post('http://52.41.87.175:3001/groupCreate', data)
+        axios.post('http://localhost:3001/groupCreate', data)
           .then((response) => {
             console.log("Sucessful")
             if (response.status === 200) {

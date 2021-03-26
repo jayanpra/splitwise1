@@ -8,8 +8,10 @@ const fileUpload = require('express-fileupload');
 const jwtoken= require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose')
+
 app.set('view engine', 'ejs');
-app.use(cors({ origin: 'http://52.41.87.175:3000', credentials: true }));
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(bodyParser.json());
 app.use(fileUpload());
 app.use( bodyParser.urlencoded( { extended: false } ) );
@@ -22,8 +24,13 @@ const db = mysql.createPool({
     database: "splitwiseStorage"
 })
 
+mongoose.connect("mongodb+srv://jayant:<password>@splitwise.spixx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+    (req,res) => {
+        console.log("Connected to mongodb")
+    }
+
 // const db = mysql.createPool({
-//     host: "52.41.87.175",
+//     host: "localhost",
 //     user: "root",
 //     password: "password",
 //     database: "splitwiseStorage"
@@ -68,7 +75,7 @@ app.get("/check/auth", verifyToken,(req,res) => {
 });
 /*
 app.use(function(req, res, next){
-    res.setHeader('Access-Control-Allow-Origin', 'http://52.41.87.175:3000');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');

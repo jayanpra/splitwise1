@@ -38,7 +38,7 @@ const Dashboard = () => {
         if (token) {
             const serverData = { 'token': token, settle: friends.settle };
             axios.defaults.withCredentials = true;
-            axios.post('http://52.41.87.175:3001/settleUp', serverData)
+            axios.post('http://localhost:3001/settleUp', serverData)
             .then((response) => {
                 if (response.status === 200) {
                     pullExit(true)
@@ -60,7 +60,7 @@ const Dashboard = () => {
             if (token) {
                 const serverData = { 'token': token };
                 axios.defaults.withCredentials = true;
-                axios.post('http://52.41.87.175:3001/getDash', serverData)
+                axios.post('http://localhost:3001/getDash', serverData)
                 .then((response) => {
                     if (response.status === 200) {
                         pullExit(false)

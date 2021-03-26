@@ -62,7 +62,7 @@ const Profile = () => {
       if (token) {
         const serverData = { 'token': token };
         axios.defaults.withCredentials = true;
-        axios.post('http://52.41.87.175:3001/profile/initialPull', serverData)
+        axios.post('http://localhost:3001/profile/initialPull', serverData)
           .then((response) => {
             if (response.status === 200) {
               localStorage.setItem("currency", response.data.currency)
@@ -73,7 +73,7 @@ const Profile = () => {
                   name: response.data.name,
                   email: response.data.email,
                   phone: response.data.phone,
-                  pic: "http://52.41.87.175:3001/"+response.data.pic,
+                  pic: "http://localhost:3001/"+response.data.pic,
                   currency: response.data.currency,
                   timezone: response.data.timezone,
                   language: response.data.language,
@@ -139,7 +139,7 @@ const Profile = () => {
     for (var value of formData.values()) {
         console.log(value);
     }
-    axios.post('http://52.41.87.175:3001/imageupdate',formData,config )
+    axios.post('http://localhost:3001/imageupdate',formData,config )
       .then((response) => {
         if (response.status === 200) {
           console.log("Records Saved")
@@ -152,7 +152,7 @@ const Profile = () => {
   const onProfileChange = (value) => {
     const pckg = {token:localStorage.getItem('token'), data: value}
     axios.defaults.withCredentials = true;
-    axios.post('http://52.41.87.175:3001/profile/update', pckg)
+    axios.post('http://localhost:3001/profile/update', pckg)
       .then((response) => {
         if (response.status === 200) {
           console.log("Records Saved")

@@ -22,7 +22,7 @@ const Register = () => {
             password: password
         }
         axios.defaults.withCredentials = true;
-        axios.post('http://52.41.87.175:3001/register',data)
+        axios.post('http://localhost:3001/register',data)
         .then(response => {
             console.log("Status Code : ",response.status);
             if(response.status === 200){

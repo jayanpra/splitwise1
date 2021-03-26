@@ -19,7 +19,7 @@ const Recent = () => {
             if (token) {
                 const serverData = { 'token': token };
                 axios.defaults.withCredentials = true;
-                axios.post('http://52.41.87.175:3001/pullRecent', serverData)
+                axios.post('http://localhost:3001/pullRecent', serverData)
                 .then((response) => {
                     if (response.status === 200) {
                         pullExit(false)
