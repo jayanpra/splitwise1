@@ -9,6 +9,8 @@ import { BsFillPersonPlusFill } from "react-icons/bs";
 import axios from 'axios';
 import { Redirect } from 'react-router-dom'
 import {Hint}  from 'react-autocomplete-hint'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const GroupCreate = () => {
     const [groupMem, changeMember] = useState({members: [], group_member_no: [1], refresh: false})
@@ -17,6 +19,7 @@ const GroupCreate = () => {
     const [textState, setTextState] = useState({})
     const [delayed, noSession] = useState(false)
     const [group,gReturn] = useState(false)
+    const notify = (message) => toast(message);
 
 
     const addField = (e) => {
@@ -70,6 +73,9 @@ const GroupCreate = () => {
             if (response.status === 200) {
                 gReturn(true)
             }
+            else if (response.status === 203) {
+                notify("The token has expired")
+            }
             else {
                 console.log(response)
             }
@@ -82,6 +88,7 @@ const GroupCreate = () => {
         <div>
             {group ? <Redirect to='/group'/>: null}
             {delayed ? <Redirect to='/landing'/>: null}
+            <ToastContainer />
             <Navigator loggedin={true}/>
             <Row style={{marginTop:"100px"}}> 
                 <Col sm={2}>

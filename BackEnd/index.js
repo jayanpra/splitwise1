@@ -24,11 +24,11 @@ const db = mysql.createPool({
     database: "splitwiseStorage"
 })
 
-mongoose.connect("mongodb+srv://jayant:<password>@splitwise.spixx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+mongoose.connect("mongodb+srv://jayant:jayant@splitwise.spixx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
     (req,res) => {
         console.log("Connected to mongodb")
     }
-
+)
 // const db = mysql.createPool({
 //     host: "localhost",
 //     user: "root",

@@ -9,8 +9,12 @@ import GroupSide from '../common/GroupSide';
 import AddExpense from '../common/AddExpense';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useSelector, useDispatch } from "react-redux";
+import { setSingleData, setRData } from '../../reducer/ProfileReducer'
 
 const Profile = () => {
+  const dispatch = useDispatch();
+  const redux_data = useSelector(state => state.profile);
   const currency = ['USD', 'KWD', 'BHD', 'GBP', 'EUR', 'CAD'];
   const timezone = ['UTC - 12:00',
     'UTC - 11:00',
@@ -68,18 +72,13 @@ const Profile = () => {
               localStorage.setItem("currency", response.data.currency)
               localStorage.setItem("fname", response.data.name.split( )[0])
               console.log(response.data)
-              setData(
-                {
-                  name: response.data.name,
-                  email: response.data.email,
-                  phone: response.data.phone,
-                  pic: "http://localhost:3001/"+response.data.pic,
-                  currency: response.data.currency,
-                  timezone: response.data.timezone,
-                  language: response.data.language,
-                  image: response.data.image,
-                }
-              );
+              dispatch( setRData({pname: response.data.name, 
+                                email: response.data.email, 
+                                phone: response.data.phone,
+                                pic_loc: "http://localhost:3001/"+response.data.pic,
+                                currency: response.data.currency,
+                                timezone: response.data.timezone,
+                                language: response.data.language}))
             }
           })
           .then((response) => {
@@ -143,6 +142,9 @@ const Profile = () => {
       .then((response) => {
         if (response.status === 200) {
           console.log("Records Saved")
+          const regex = /\/[\w]+\.\w+/
+          const new_path = redux_data.pic_loc.replace(regex, event.target.files[0].name)
+          dispatch(setSingleData({key:"image", value: new_path}))
         }
       })
       .then((response) => {
@@ -156,7 +158,7 @@ const Profile = () => {
       .then((response) => {
         if (response.status === 200) {
           console.log("Records Saved")
-          update_local_info(value.value, value.type)
+          dispatch(setSingleData({key:value.type, value: value.value}))
           notify(value.type)
         }
       })
@@ -178,25 +180,25 @@ const Profile = () => {
                 <GroupSide LogOut={LogOut} launchExpense={showAddExpense}/>
                 </Col>
                 <Col sm={6}>
-                    <ProfileView onImageChange={onImageChange} para={data} onChange={onProfileChange}/>
+                    <ProfileView onImageChange={onImageChange} para={redux_data} onChange={onProfileChange}/>
                 </Col>
                 <Col sm={3}>
                     <Row>
                     <Container style={{height:"100px", marginTop:"50px"}}>
                         <h5 style={{textAlign: "left"}}>Your Currency:</h5>
-                        <ProfileMetric head={"Currency"} options={currency} para={data["currency"]} onChange={onProfileChange}/>
+                        <ProfileMetric head={"Currency"} options={currency} para={redux_data.currency} onChange={onProfileChange}/>
                     </Container>
                     </Row>
                     <Row>
                     <Container style={{height:"100px"}}>
                         <h5 style={{textAlign: "left"}}>Your Timezone:</h5>
-                        <ProfileMetric head={"Timezone"} options={timezone} para={data["timezone"]} onChange={onProfileChange}/>
+                        <ProfileMetric head={"Timezone"} options={timezone} para={redux_data.timezone} onChange={onProfileChange}/>
                     </Container>
                     </Row>
                     <Row>
                     <Container style={{height:"100px"}}>
                         <h5 style={{textAlign: "left"}}>Your Language:</h5>
-                        <ProfileMetric head={"Language"} options={language} para={data["language"]} onChange={onProfileChange}/>
+                        <ProfileMetric head={"Language"} options={language} para={redux_data.language} onChange={onProfileChange}/>
                     </Container>
                     </Row>
                 </Col>

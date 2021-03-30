@@ -11,11 +11,11 @@ const ProfileView = ({para, onChange,onImageChange}) => {
             <Container>
                 <Row>
                     <Col>
-                        <ProfileImage pic ={para.pic} onImageChange={onImageChange}/>
+                        <ProfileImage pic ={para.pic_loc} onImageChange={onImageChange}/>
                     </Col>
                     <Col>
                         <Container style={{'height':'80px'}}>
-                        <ToggleBox heading="Name" value={para.name} onChange={onChange}/>
+                        <ToggleBox heading="Name" value={para.pname} onChange={onChange}/>
                         </Container>
                         <Container style={{'height':'80px'}}>
                         <ToggleBox heading="Email" value={para.email} onChange={onChange}/>
