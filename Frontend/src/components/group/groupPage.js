@@ -8,6 +8,7 @@ import axios from 'axios';
 import AddExpense from '../common/AddExpense'
 import { Redirect } from 'react-router-dom';
 import {FaCheck} from "react-icons/fa";
+import ProfileImage from '../profile/profileImage'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -19,6 +20,7 @@ const GroupPage = () => {
         group_name:[],
         selected_group: [],
         currency: null,
+        pic: null,
       });
 
     const [expTog, setToggle] = useState(false)
@@ -49,6 +51,7 @@ const GroupPage = () => {
                       groups: [...response.data.group],
                       selected_group: [...response.data.expense],
                       group_name: [...group_data],
+                      pic: "http://localhost:3001/" + response.data.pics
                     });
                 }
                 else {
@@ -148,6 +151,40 @@ const GroupPage = () => {
             }); 
     }
 
+
+    const onImageChange = (event) => {
+        if (data.name === null){
+            notify("no group selected")
+            return
+        }
+        let gid, id;
+        for(let i in data.groups){
+            if (data.groups[i].name === data.name){
+                gid = data.groups[i].id
+                id=i
+            }
+        }
+        const formData = new FormData();
+        console.log(event.target.files[0]);
+        formData.append('profileImage',event.target.files[0],event.target.files[0].name + ',' + gid);
+        const config = {
+          headers: { 
+            'content-type': 'multipart/form-data'
+          }
+        }
+        for (var value of formData.values()) {
+            console.log(value);
+        }
+        axios.post('http://localhost:3001/imagegroupupdate',formData,config )
+          .then((response) => {
+            if (response.status === 200) {
+              console.log("Records Saved")
+            }
+          })
+          .then((response) => {
+              console.log("DataBase Issue")
+          }); 
+    }
     return (
         <div>
             <ToastContainer />
@@ -176,6 +213,9 @@ const GroupPage = () => {
                         : null}
                         {show_req ? <MDBBtn onClick={showRequest} color="warning">Collapse</MDBBtn> :
                         <MDBBtn onClick={showRequest} color="warning">Show Group Request</MDBBtn>}
+                    </Row>
+                    <Row style={{marginTop: "2%"}}>
+                    <ProfileImage pic ={data.pic} onImageChange={onImageChange} />
                     </Row>
                 </Col>
             </Row>

@@ -14,7 +14,7 @@ const ProfileMetric = ({head, options, para, onChange}) => {
     useEffect(() => {
         
         options.splice(options.indexOf(para),1)
-    })
+    },[options, para])
 
     return (
         <div>

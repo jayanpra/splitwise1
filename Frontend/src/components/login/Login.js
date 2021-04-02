@@ -21,9 +21,13 @@ const Login = () => {
         return <Redirect to='/register'/>
     }
     const on_Click_login = (email, password) => {
-        const email_val = /\S+@\S+\.\S+/
+        const email_val = /^\S+@\S+\.\S+$/
         if (!email_val.test(email)){
             notify(`Invalid Email`)
+            return
+        }
+        if (password.length === 0){
+            notify(`Empty Password`)
             return
         }
         let data = {
@@ -37,6 +41,9 @@ const Login = () => {
             if(response.status === 200){
                 localStorage.setItem("token", response.data.token)
                 setClick(clickstate = "profile")
+            }
+            else {
+                notify("Incorrect Credentials")
             }
         })
         .then(response => {

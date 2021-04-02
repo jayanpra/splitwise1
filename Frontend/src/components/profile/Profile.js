@@ -152,6 +152,21 @@ const Profile = () => {
       }); 
   }
   const onProfileChange = (value) => {
+    console.log(value)
+    if (value.type === 'email') {
+      const email_val = /\S+@\S+\.\S+/
+        if (!email_val.test(value.value)){
+          notify("Invalid Email Not")
+          return
+        }
+    }
+    if (value.type === 'phone') {
+      const phone_val = /\d+/
+        if (!(phone_val.test(value.value) && value.value.length === 10)){
+          notify("Invalid Phone Not")
+          return
+        }
+    }
     const pckg = {token:localStorage.getItem('token'), data: value}
     axios.defaults.withCredentials = true;
     axios.post('http://localhost:3001/profile/update', pckg)

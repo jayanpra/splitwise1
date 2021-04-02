@@ -15,7 +15,12 @@ export const ProfileReducer = createSlice({
         setRData(state,action) {
             state.pname = action.payload.pname
             state.email = action.payload.email
-            state.phone = action.payload.phone
+            if (action.payload.phone !== null) {
+              state.phone = `(${action.payload.phone.substring(0,3)}) ${action.payload.phone.substring(3,6)} ${action.payload.phone.substring(6,10)}`
+            }
+            else {
+              state.phone = action.payload.phone
+            }
             state.pic_loc = action.payload.pic_loc
             state.currency =  action.payload.currency
             state.timezone = action.payload.timezone 
@@ -34,7 +39,7 @@ export const ProfileReducer = createSlice({
                   break;
                 }
                 case 'phone':{
-                  state.email = value
+                  state.phone = `(${value.substring(0,3)}) ${value.substring(3,6)} ${value.substring(6,10)}`
                   break;
                 }
                 case 'currency':{

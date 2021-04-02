@@ -285,13 +285,15 @@ app.post('/groupFill', function(req,res) {
         res.end("Token has expired")
         return
     }
-    let sqlQuery = `SELECT T1.group_id AS gid, T1.active AS act, T2.group_name AS name 
+    let sqlQuery = `SELECT T1.group_id AS gid, T1.active AS act, T2.group_name AS name, T2.group_Pic as pic 
                     FROM groupMem AS T1 LEFT JOIN groupInfo AS T2 ON  T1.group_id = T2.group_id 
                     WHERE T1.member_id = ${id};`
     let group_list=[];
     let expenses=[];
+    let pic=null;
     db.query(sqlQuery, (err, result) => {
         if (!err){
+            pic = result[0].pic
             for (let i in result) {
                 group_list.push({name:result[i].name, id:result[i].gid, active: result[i].act})
             }
@@ -316,7 +318,7 @@ app.post('/groupFill', function(req,res) {
                             expenses.push({expense_name:result[i].exp_name, date:result[i].date, shares:result[i].share, payee: result[i].fname, amount: result[i].amount, color:'red'})
                         }
                     }
-                    const finaldata = {group:group_list, expense: expenses}
+                    const finaldata = {group:group_list, expense: expenses, pics: pic}
                     res.writeHead(200,{
                         'Content-Type' : 'text/plain'
                     })
@@ -780,6 +782,44 @@ app.post('/imageupdate', function(req,res) {
         }
         else {
             var sql = `UPDATE userInfo SET image='${fileName}' WHERE id=${userID}`;
+            db.query(sql, (err, results) => {
+                if (err) {
+                    console.log(err);
+                    res.status(400).end("Error:", err);
+                }
+            });
+        }
+    })
+    res.json({
+        fileName: fileName,
+        filePath: filePath
+    })
+});
+
+app.post('/imagegroupupdate', function(req,res) {
+    if (req.files === null) {
+        return res.status(400).send('No File Upload');
+    }
+    const file = req.files.profileImage;
+    var x = req.files.profileImage.name.split(',')[1];
+    const userID = x;
+    const fileName = req.files.profileImage.name.split(',')[0];
+    console.log(__dirname);
+    var pathToImage = path.join(__dirname, './public');
+
+    const filePathwithoutfileName = pathToImage + '/images/grouppics/' + userID;
+    console.log(filePathwithoutfileName);
+    const filePath = pathToImage + '/images/grouppics/' + userID + '/' + fileName;
+
+    if (!fs.existsSync(filePathwithoutfileName)) {
+        fs.mkdirSync(filePathwithoutfileName);
+    }
+    file.mv(filePath, err => {
+        if (err) {
+            return res.status(500).end(err);
+        }
+        else {
+            var sql = `UPDATE groupInfo SET group_Pic='${fileName}' WHERE group_Name=${userID}`;
             db.query(sql, (err, results) => {
                 if (err) {
                     console.log(err);

@@ -27,8 +27,8 @@ const LoginForm = ({onClick}) => {
                 <MDBInput id="pass" type="password" size="lg"/>
                 </Col>
                 </Row>
-                <Button className="btn btn-success" onClick={() => onClick(document.getElementById("email").value,
-                                                                            document.getElementById("pass").value)} type="button">Sign In
+                <Button className="btn btn-success" onClick={() => onClick(document.getElementById("email").value.trim(),
+                                                                            document.getElementById("pass").value.trim())} type="button">Sign In
                 </Button>
             </Form>
             </Container>

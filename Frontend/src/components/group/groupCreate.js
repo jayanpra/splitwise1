@@ -59,13 +59,24 @@ const GroupCreate = () => {
     }, [init])
 
     const onSubmit = () => {
+        const gpname = document.getElementById('gpname').value.trim()
+        if (gpname.length === 0){
+            notify("Empty group Name")
+            return
+        }
         let data = {
             token: localStorage.getItem('token'),
-            group_name: document.getElementById('gpname').value,
+            group_name: gpname,
             group_members: []
         }
         for (let i in groupMem.group_member_no) {
-            data.group_members.push(document.getElementById(groupMem.group_member_no[i]).value)
+            let value = document.getElementById(groupMem.group_member_no[i]).value.trim()
+            if (data.group_members.includes(value)) {
+                notify("Redundant members")
+                return
+            }
+            data.group_members.push(value)
+
         }
         axios.post('http://localhost:3001/groupCreate', data)
           .then((response) => {
@@ -75,6 +86,9 @@ const GroupCreate = () => {
             }
             else if (response.status === 203) {
                 notify("The token has expired")
+            }
+            else if (response.status === 204) {
+                notify("The group already exist")
             }
             else {
                 console.log(response)

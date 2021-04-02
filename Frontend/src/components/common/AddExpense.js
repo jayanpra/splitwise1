@@ -1,6 +1,8 @@
 import React from 'react';
 import { MDBBtn, MDBModal, MDBModalBody, MDBModalHeader, MDBModalFooter, MDBInput } from 'mdbreact';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const AddExpense = ({open, onToggle}) => {
@@ -17,6 +19,9 @@ const AddExpense = ({open, onToggle}) => {
             .then((response) => {
                 if (response.status === 200) {
                   onToggle()
+                }
+                else {
+
                 }
               })
             .then((response) => {

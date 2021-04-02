@@ -5,7 +5,6 @@ import ToggleBox from '../common/ToggleBox'
 
 const ProfileView = ({para, onChange,onImageChange}) => {
     //console.log(para.para.name," is Para")
-    
     return (
         <div>
             <Container>
