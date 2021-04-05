@@ -91,41 +91,7 @@ const Profile = () => {
     }
   },[data]);
 
-  const update_local_info = (value, key) => {
-    switch (key) {
-      case 'name':{
-        setData({...data, name: value,})
-        break;
-      }
-      case 'email':{
-        setData({...data, email: value,})
-        break;
-      }
-      case 'phone':{
-        setData({...data, phone: value,})
-        break;
-      }
-      case 'currency':{
-        localStorage.setItem("currency", value)
-        setData({...data, currency: value,})
-        break;
-      }
-      case 'timezone':{
-        setData({...data, timezone: value,})
-        break;
-      }
-      case 'language':{
-        setData({...data, language: value,})
-        break;
-      }
-      case 'image':{
-        setData({...data, image: value,})
-        break;
-      }
-      default:
-        break;
-    }
-  }
+  
   const onImageChange = (event) => {
     const formData = new FormData();
     console.log(event.target.files[0]);
@@ -145,6 +111,7 @@ const Profile = () => {
           const regex = /\/[\w]+\.\w+/
           const new_path = redux_data.pic_loc.replace(regex, event.target.files[0].name)
           dispatch(setSingleData({key:"image", value: new_path}))
+          window.location.reload(false)
         }
       })
       .then((response) => {

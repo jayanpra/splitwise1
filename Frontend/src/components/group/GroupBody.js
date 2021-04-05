@@ -2,21 +2,22 @@ import React from 'react'
 import { MDBCard, MDBCardBody, MDBCardTitle,  MDBContainer, MDBBtn} from 'mdbreact';
 import DashItems from '../common/DashItems';
 import ToggleBox from '../common/ToggleBox'
+import background from "../common/header.jpeg"
 
 const GroupBody = ({name, expense_list,onChange, exitGroup}) => {
     console.log(expense_list)
     return (
         <div>
-            <MDBContainer style={{width:"800px", height:"60px"}}>
-                <MDBCard>
-                <MDBCardBody>
-                    <MDBCardTitle><ToggleBox heading="Your Group" value={name} onChange={onChange}/></MDBCardTitle>
+            <MDBContainer style={{width:"80%", height:"100%"}}>
+                <MDBCard style={{backgroundImage: `url(${background})`}}>
+                <MDBCardBody style={{color:"white"}}>
+                    <MDBCardTitle><ToggleBox heading="Your Group" value={name} onChange={onChange} color='white' edit_color='white' cross_color='white' tick_color='white'/></MDBCardTitle>
                     <MDBBtn style={{ backgroundColor: 'red'}} onClick={() => exitGroup(name)}> Exit group</MDBBtn>
                     </MDBCardBody>
                     </MDBCard>
-            </MDBContainer><br/><br/><br/><br/>
+            </MDBContainer>
             {expense_list.map((expense)=> (
-                <div><DashItems group={name} body={expense}/><br/></div>
+                <div><DashItems group={name} body={expense}/></div>
             ))
             }
         </div>

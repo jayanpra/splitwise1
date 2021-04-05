@@ -7,7 +7,7 @@ const DashItems = ({body, group}) => {
         return `${months[parseInt(temp[1])-1]} ${temp[2]}, ${temp[0]}`
     }
     return (
-        <MDBContainer style={{width:"800px", height:"100px"}}>
+        <MDBContainer style={{width:"80%", height:"100%"}}>
             <MDBCard>
                 <MDBCardBody>
                     <MDBCardTitle style={{textalign:"left"}}>{body.expense_name} ({group})</MDBCardTitle>

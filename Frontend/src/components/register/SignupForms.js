@@ -1,6 +1,6 @@
 import {Form,Container, Row, Col, Button} from 'react-bootstrap'
 import { MDBInput,MDBTypography } from "mdbreact";
-import {useState, useEffect} from 'react'
+import {useState} from 'react'
 import { useSelector, useDispatch } from "react-redux";
 import {addDetails} from '../../reducer/RegisterReducer'
 
@@ -16,7 +16,7 @@ const SignupForms = ({onClick}) => {
         backtrack()
         dispatch(addDetails({fname: fname, lname: lname, email: email, password: password}))
         let flag = false
-        const name_val = /^([a-z]|[A-Z]|\ )+$/
+        const name_val = /^([a-z]|[A-Z]| )+$/
 
         if (!(name_val.test(fname) && name_val.test(lname))){
             setClickname(true)
@@ -48,7 +48,7 @@ const SignupForms = ({onClick}) => {
     }
     return (
         <div>
-            <Container fluid style={{ backgroundColor: 'lightblue', height: '1000px'}}>
+            <Container fluid style={{ backgroundColor: 'lightblue', height: '100%'}}>
             <h6>P</h6>
             <Form>
                 <Row style={{marginTop: "4%"}}>
