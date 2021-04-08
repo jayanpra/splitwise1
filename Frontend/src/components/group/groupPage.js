@@ -12,7 +12,7 @@ import ProfileImage from '../profile/profileImage'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from "react-redux";
-import { setGroup, setSelectedGroup, setImage, removeGroup } from '../../reducer/GroupReducer';
+import { setGroup, setSelectedGroup, setImage, removeGroup,approveGroup } from '../../reducer/GroupReducer';
 
 
 const GroupPage = () => {
@@ -101,6 +101,7 @@ const GroupPage = () => {
         axios.post('http://localhost:3001/altergroup', serverData)
             .then((response) => {
                 if (response.status === 200) {
+                    dispatch(approveGroup(id))
                     redux_data.groups[id].active = "active"
                 }
                 toggleShow(false)
@@ -149,7 +150,7 @@ const GroupPage = () => {
                         notify("In a hurry to leave this group settle up first")
                     }
                     else if (response.data.message === "Group Settled"){
-                        dispatch(exitGroup(gname))
+                        dispatch(removeGroup(gname))
                         changeGroup(redux_data.group_names[0])
                         setData({...data, name:null})
                     }
@@ -200,11 +201,7 @@ const GroupPage = () => {
             <AddExpense open={expTog} onToggle={showAddExpense}/>
             <Navigator loggedin={true}/>
             <Container fluid style={{ backgroundColor: 'lightblue', position: "fixed", top: 0, left:0, height: "100%" }}>
-            <Row><MDBContainer>
-                <p>.</p>
-                <p className="ml-5 ml-lg-0">.</p>
-            </MDBContainer></Row>
-            <Row>
+            <Row style={{marginTop: "4%"}}>
                 <Col sm={2}>
                     <GroupSide LogOut={LogOut} groupname={redux_data.group_name} launchExpense={showAddExpense} changeGroup={changeGroup}/>
                 </Col>
