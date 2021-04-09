@@ -11,10 +11,10 @@ const Register = () => {
     // const notify = (message) => toast(message);
 
     const onClickLogin = () => {
-        setClick(clickstate = "login")
+        setClick(clickstate = "dash")
     }
-    if (clickstate === "login") {
-        return <Redirect to='/login'/>
+    if (clickstate === "dash") {
+        return <Redirect to='/dash'/>
     }
     const on_submit_form = (email,fname,lname,password) => {
         console.log(password, " ", email)
@@ -29,7 +29,8 @@ const Register = () => {
         .then(response => {
             console.log("Status Code : ",response.status);
             if(response.status === 200){
-                setClick(clickstate = "login")
+                localStorage.setItem("token", response.data.token)
+                setClick(clickstate = "dash")
             }
             else {
                 alert("Email Already Exist")
@@ -43,7 +44,7 @@ const Register = () => {
     
     return (
         <div>
-            {clickstate === "login" ? <Redirect to='/login'/> : null }
+            {clickstate === "dash" ? <Redirect to='/dash'/> : null }
             <ToastContainer />
             <Navigator onClickLogin={onClickLogin}/>
             <SignupForms onClick={on_submit_form}/>

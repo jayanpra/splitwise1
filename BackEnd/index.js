@@ -9,6 +9,7 @@ const jwtoken= require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose')
+const dbSQL = true
 
 app.set('view engine', 'ejs');
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
@@ -24,11 +25,54 @@ const db = mysql.createPool({
     database: "splitwiseStorage"
 })
 
-mongoose.connect("mongodb+srv://jayant:jayant@splitwise.spixx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+mongoose.connect("mongodb+srv://jayant:jayant@splitwise.spixx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", 
     (req,res) => {
         console.log("Connected to mongodb")
     }
 )
+
+const Schema = mongoose.Schema;
+//const ObjectId = Schema.ObjectId;
+
+const userInfo = new Schema({
+    fname:  {type: String, required: true}, 
+    lname: {type: String, required: true},
+    email:   {type: String, required: true},
+    password:   {type: String, required: true},
+    image: String,
+    currency: String,
+    language: String,
+    timezone: String,
+  });
+const i_Expense = new Schema({
+    lender_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    borrow_id: { type: Schema.Types.ObjectId, ref: 'User', required: true},
+    group_id: {type: Schema.Types.ObjectId, ref: 'Group', required: true},
+    expense_id: {type: Schema.Types.ObjectId, ref: 'gExpense', required: true},
+    expense_name: {type: String, required: true},
+    expense: {type: Number, required: true},
+})
+const g_Expense = new Schema({
+    date: {type: Date, required: true},
+    payee: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    amount: {type: Number, required: true },
+    shares: {type: Number, required: true },
+    expense_name: { type: String, required: true},
+    comment: [{comment: { type: String, required: true}, author: { type: Schema.Types.ObjectId, ref: 'User', required: true }}],
+})
+
+const groupInfo = new Schema({
+    group_name: {type: String, required: true},
+    group_pic: {type: String, required: true},
+    owner: { type: Schema.Types.ObjectId, ref: 'User' },
+    members: [{member : { type: Schema.Types.ObjectId, ref: 'User', required:true}, status: {} }]
+})
+
+const User = mongoose.model("User", userInfo)
+const Group = mongoose.model("Group", groupInfo)
+const gExpense = mongoose.model("gExpense", g_Expense)
+const iExpense = mongoose.model("iExpense", i_Expense)
+
 // const db = mysql.createPool({
 //     host: "localhost",
 //     user: "root",
@@ -87,22 +131,61 @@ app.post('/register',function(req,res) {
     console.log("Its in Here");
     //console.log(req);
     let password = hashFunction.generate(req.body.password);
-    let sqlInsert = `INSERT INTO userInfo (email, fname, lname, password) VALUES (\'${req.body.email}\',\'${req.body.fname}\',\'${req.body.lname}\',\'${password}\');`
-    db.query(sqlInsert, (err, result) => {
-        if (!err){
-            console.log(result.insertId)
-            res.writeHead(200,{
-                'Content-Type' : 'text/plain'
-            })
-            res.end("Successful Submitted");
-        }
-        else {
-            res.writeHead(204,{
-                'Content-Type' : 'text/plain'
-            })
-            res.end("Issue with data base", err)
-        }
-    })
+    if (false) {
+        let sqlInsert = `INSERT INTO userInfo (email, fname, lname, password) VALUES (\'${req.body.email}\',\'${req.body.fname}\',\'${req.body.lname}\',\'${password}\');`
+        db.query(sqlInsert, (err, result) => {
+            if (!err){
+                console.log(result.insertId)
+                const id = result.insertId
+                const token = jwtoken.sign({data: id},"jwtSecret", {
+                    expiresIn: '1h'
+                });
+                console.log("Successfully Verified", result)
+                res.writeHead(200,{
+                    'Content-Type' : 'text/plain'
+                })
+                console.log("Admitted", token)
+                res.end(JSON.stringify({auth:true, token: token}));
+            }
+            else {
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Issue with data base", err)
+            }
+        })
+    }
+    else {
+        const record = new User({
+            fname: req.body.fname,
+            lname: req.body.lname,
+            email: req.body.email,
+            password: req.body.password,
+        })
+        record.save(function (err) {
+            if (err){
+                console.log(err);
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Issue with data base", err)
+            }
+            else{
+                console.log(record)
+                const id = record._id;
+                const token = jwtoken.sign({data: id},"jwtSecret", {
+                    expiresIn: '1h'
+                });
+                console.log("Successfully Verified", result)
+                res.writeHead(200,{
+                    'Content-Type' : 'text/plain'
+                })
+                console.log("Admitted", token)
+                res.end(JSON.stringify({auth:true, token: token}));
+            }
+        });
+    }
+    
 });
 app.post('/profile/initialPull', function(req,res){
     const id = get_id(req.body.token)
