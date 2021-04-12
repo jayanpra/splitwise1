@@ -9,7 +9,10 @@ const jwtoken= require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose')
+const {Kafka} = require('kafkajs')
+const dotenv = require('dotenv')
 const dbSQL = true
+
 
 app.set('view engine', 'ejs');
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
@@ -17,6 +20,7 @@ app.use(bodyParser.json());
 app.use(fileUpload());
 app.use( bodyParser.urlencoded( { extended: false } ) );
 app.use(express.static(path.resolve('./public')));
+dotenv.config()
 
 const db = mysql.createPool({
     host: "database-2.copvz5nsdbwv.us-west-2.rds.amazonaws.com",
@@ -24,8 +28,12 @@ const db = mysql.createPool({
     password: "password",
     database: "splitwiseStorage"
 })
+const kafka = new Kafka({
+    clientId: "splitwise",
+    brokers: ['localhost:9091', 'localhost:9092']
+})
 
-mongoose.connect("mongodb+srv://jayant:jayant@splitwise.spixx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", 
+mongoose.connect('mongodb+srv://jayant29:jayant29@splitwise.spixx.mongodb.net/splitwiseStorage?retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology:true},
     (req,res) => {
         console.log("Connected to mongodb")
     }
@@ -37,7 +45,7 @@ const Schema = mongoose.Schema;
 const userInfo = new Schema({
     fname:  {type: String, required: true}, 
     lname: {type: String, required: true},
-    email:   {type: String, required: true},
+    email:   {type: String, required: true, unique: true},
     password:   {type: String, required: true},
     image: String,
     currency: String,
@@ -127,10 +135,28 @@ app.use(function(req, res, next){
     next();
   });
 */
-app.post('/register',function(req,res) {
-    console.log("Its in Here");
+app.post('/register', async function(req,res) {
     //console.log(req);
     let password = hashFunction.generate(req.body.password);
+    // const producer = kafka.producer()
+    // await producer.connect()
+    // await producer.send({
+    //     topic: "register",
+    //     messages:[
+    //         {key: req.body.email, value: {fname: req.body.fname,
+    //             lname: req.body.lname,
+    //             email: req.body.email,
+    //             password: password}
+    //         },
+    //     ack = 1 
+    //     ]
+    // })
+    // const consumer = kafka.consumer({groupId:'my-group'})
+    // await consumer.connect()
+    // await consumer.subscribe({topic: 'register_return'})
+    // await consumer.run({
+    //     eachMessage
+    // })
     if (false) {
         let sqlInsert = `INSERT INTO userInfo (email, fname, lname, password) VALUES (\'${req.body.email}\',\'${req.body.fname}\',\'${req.body.lname}\',\'${password}\');`
         db.query(sqlInsert, (err, result) => {
@@ -156,34 +182,40 @@ app.post('/register',function(req,res) {
         })
     }
     else {
+        console.log("Tests")
         const record = new User({
             fname: req.body.fname,
             lname: req.body.lname,
             email: req.body.email,
-            password: req.body.password,
+            password: password,
         })
-        record.save(function (err) {
-            if (err){
-                console.log(err);
-                res.writeHead(204,{
-                    'Content-Type' : 'text/plain'
-                })
-                res.end("Issue with data base", err)
-            }
-            else{
-                console.log(record)
-                const id = record._id;
+        const id = record._id
+        await record.save((err) => {
+            if (!err) {
                 const token = jwtoken.sign({data: id},"jwtSecret", {
                     expiresIn: '1h'
                 });
-                console.log("Successfully Verified", result)
                 res.writeHead(200,{
                     'Content-Type' : 'text/plain'
                 })
-                console.log("Admitted", token)
                 res.end(JSON.stringify({auth:true, token: token}));
             }
-        });
+            else{
+                if (err.keyPattern.email === 1) {
+                    res.writeHead(204,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("Email exist", err)
+                }
+                else {
+                    res.writeHead(400,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("Issue with database", err)
+                }
+
+            }
+        })
     }
     
 });
@@ -197,43 +229,70 @@ app.post('/profile/initialPull', function(req,res){
         return
     }
     console.log(get_id(req.body.token)," is ID")
-    const sqlQuery = `SELECT * from userInfo WHERE id=${id}`
-    console.log(sqlQuery)
-    db.query(sqlQuery, (err, result, fields) => {
-        if (!err){
-            console.log(result)
-            res.writeHead(200,{
-                'Content-Type' : 'text/plain'
-            })
-            let pic_path;
-            if (result[0].image!=null) {
-                pic_path = "/images/profilepics/"+ id + "/"+result[0].image
+    if (false) {
+        const sqlQuery = `SELECT * from userInfo WHERE id=${id}`
+        console.log(sqlQuery)
+        db.query(sqlQuery, (err, result, fields) => {
+            if (!err){
+                console.log(result)
+                res.writeHead(200,{
+                    'Content-Type' : 'text/plain'
+                })
+                let pic_path;
+                if (result[0].image!=null) {
+                    pic_path = "/images/profilepics/"+ id + "/"+result[0].image
+                }
+                else{
+                    pic_path=null
+                }
+                const endData = {auth:true, 
+                    name: result[0].fname + " " + result[0].lname,
+                    email: result[0].email,
+                    phone: result[0].phone,
+                    pic : pic_path, 
+                    currency: result[0].currency,
+                    timezone: result[0].timezone,
+                    language: result[0].language}
+                res.end(JSON.stringify(endData));    
             }
-            else{
-                pic_path=null
+            else {
+                console.log(err)
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Issue with data base")
             }
-            const endData = {auth:true, 
-                name: result[0].fname + " " + result[0].lname,
-                email: result[0].email,
-                phone: result[0].phone,
-                pic : pic_path, 
-                currency: result[0].currency,
-                timezone: result[0].timezone,
-                language: result[0].language}
-            res.end(JSON.stringify(endData));    
-        }
-        else {
-            console.log(err)
-            res.writeHead(204,{
-                'Content-Type' : 'text/plain'
-            })
-            res.end("Issue with data base")
-        }
-    })
+        })
+    }
+    else {
+        User.findOne({_id:id}, (err, user) => {
+            if (!err) {
+                const endData = {auth:true, 
+                    name: user.fname + " " + user.lname,
+                    email: user.email,
+                    phone: 'phone' in user ? user.phone : null,
+                    pic : 'pic' in user ? user.pic : null, 
+                    currency: 'currency' in user ? user.currency : USD, 
+                    timezone: 'timezone' in user ? user.timezone : null, 
+                    language: 'language' in user ? user.language : null, }
+                res.end(JSON.stringify(endData));
+            }
+            else {
+                console.log(err)
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Invalid Credentials")
+            }
+        })
+    }
+    
 })
 
-app.post('/profile/update', function(req,res){
+app.post('/profile/update', async function(req,res){
     const id = get_id(req.body.token)
+    const field = req.body.data.type
+    const value = req.body.data.value
     if (!id){
         res.writeHead(203,{
             'Content-Type' : 'text/plain'
@@ -241,24 +300,51 @@ app.post('/profile/update', function(req,res){
         res.end("Token has expired")
         return
     }
-    const sqlQuery = `UPDATE userInfo SET ${req.body.data.type} = \'${req.body.data.value}\' WHERE id=${id};`
-    console.log(sqlQuery)
-    db.query(sqlQuery, (err, result, fields) => {
-        if (!err){
-            console.log(result)
-            res.writeHead(200,{
-                'Content-Type' : 'text/plain'
-            })
-            res.end("Successful Submission");    
-        }
-        else {
-            console.log(err)
-            res.writeHead(204,{
-                'Content-Type' : 'text/plain'
-            })
-            res.end("Issue with data base")
-        }
-    })
+    if (false){
+        const sqlQuery = `UPDATE userInfo SET ${req.body.data.type} = \'${req.body.data.value}\' WHERE id=${id};`
+        console.log(sqlQuery)
+        db.query(sqlQuery, (err, result, fields) => {
+            if (!err){
+                console.log(result)
+                res.writeHead(200,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Successful Submission");    
+            }
+            else {
+                console.log(err)
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Issue with data base")
+            }
+        })
+    }
+    else{
+        console.log(id)
+        console.log(field, " ", value)
+        const val = await User.findById(id)
+        console.log(val)
+        val.update({field : value })
+        User.updateOne({_id:id},{$set: {field : value }}).then((result,err) => {
+            if (!err){
+                console.log(err)
+                console.log(result)
+                res.writeHead(200,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Successful Submission");    
+            }
+            else {
+                console.log(err)
+                console.log(result)
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Issue with data base")
+            }
+        })
+    }
 })
 
 app.post('/groupCreate', function(req,res){
@@ -325,38 +411,70 @@ app.post('/groupCreate', function(req,res){
 
 
 app.post('/login', function(req,res) {
-    let sqlQuery = `SELECT * FROM userInfo WHERE email=\'${req.body.email}\';`
-    console.log(sqlQuery)
-    db.query(sqlQuery, (err, result, fields) => {
-        if (!err){
-            if (result.length == 1 && hashFunction.verify(req.body.password, result[0].password)) {
-                const id = result[0].id
-                const token = jwtoken.sign({data: id},"jwtSecret", {
-                    expiresIn: '1h'
-                })
-                console.log("Successfully Verified", result)
-                res.writeHead(200,{
-                    'Content-Type' : 'text/plain'
-                })
-                console.log("Admitted", token)
-                res.end(JSON.stringify({auth:true, token: token}));
+    if (false){
+        let sqlQuery = `SELECT * FROM userInfo WHERE email=\'${req.body.email}\';`
+        console.log(sqlQuery)
+        db.query(sqlQuery, (err, result, fields) => {
+            if (!err){
+                if (result.length == 1 && hashFunction.verify(req.body.password, result[0].password)) {
+                    const id = result[0].id
+                    const token = jwtoken.sign({data: id},"jwtSecret", {
+                        expiresIn: '1h'
+                    })
+                    console.log("Successfully Verified", result)
+                    res.writeHead(200,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    console.log("Admitted", token)
+                    res.end(JSON.stringify({auth:true, token: token}));
+                }
+                else {
+                    res.writeHead(204,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("Invalid Credentials")
+                }
+                
             }
             else {
+                console.log(err)
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Issue with data base")
+            }
+        })
+    }
+    else {
+        User.findOne({email:req.body.email}, (err, user) => {
+            if (!err) {
+                if (hashFunction.verify(req.body.password, user.password)){
+                    const token = jwtoken.sign({data: user._id},"jwtSecret", {
+                        expiresIn: '1h'
+                    })
+                    res.writeHead(200,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    console.log("Admitted", token)
+                    res.end(JSON.stringify({auth:true, token: token}));
+                }
+                else {
+                    res.writeHead(204,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("Invalid Credentials")
+                }
+            }
+            else {
+                console.log(err)
                 res.writeHead(204,{
                     'Content-Type' : 'text/plain'
                 })
                 res.end("Invalid Credentials")
             }
-            
-        }
-        else {
-            console.log(err)
-            res.writeHead(204,{
-                'Content-Type' : 'text/plain'
-            })
-            res.end("Issue with data base")
-        }
-    })
+        })
+    }
+   
 })
 
 app.post('/groupFill', function(req,res) {
