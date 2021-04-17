@@ -9,6 +9,7 @@ export const GroupReducer = createSlice({
         selected_group: [],
         currency: null,
         pic: null,
+        group_req: [],
     },
     reducers: {
         setGroup(state,action) {
@@ -18,6 +19,12 @@ export const GroupReducer = createSlice({
             state.selected_group = action.payload.selected_group
             state.currency = action.payload.currency
             state.pic = action.payload.pic
+            for (let i in action.payload.groups){
+                if (action.payload.groups[i].active == 'passive') {
+                    state.group_req.push(action.payload.groups[i].name)
+                }
+            }
+            
         },
         setSelectedGroup(state,action){
             state.name = action.payload.name

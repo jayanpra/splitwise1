@@ -29,7 +29,6 @@ const Register = () => {
         .then(response => {
             console.log("Status Code : ",response.status);
             if(response.status === 200){
-                localStorage.setItem("token", response.data.token)
                 setClick(clickstate = "dash")
             }
             else {

@@ -46,6 +46,7 @@ const GroupPage = () => {
             axios.post('http://localhost:3001/groupFill', serverData)
               .then((response) => {
                 if (response.status === 200) {
+                    console.log(response.data)
                     let group_data = []
                     for (let i in response.data.group){
                         group_data.push(response.data.group[i].name)
@@ -78,11 +79,11 @@ const GroupPage = () => {
     }
 
     const showRequest = () => {
-        for(let i in redux_data.groups){
-            if (redux_data.groups[i].active === 'inactive'){
-                getReq([...group_req, redux_data.groups[i].name])
-            }
-        }
+        // for(let i in redux_data.groups){
+        //     if (redux_data.groups[i].active === 'passive'){
+        //         getReq([...group_req, redux_data.groups[i].name])
+        //     }
+        // }
         toggleShow(!show_req)
     }
 
@@ -102,7 +103,6 @@ const GroupPage = () => {
             .then((response) => {
                 if (response.status === 200) {
                     dispatch(approveGroup(id))
-                    redux_data.groups[id].active = "active"
                 }
                 toggleShow(false)
               })
@@ -210,7 +210,7 @@ const GroupPage = () => {
                 </Col>
                 <Col sm={{ span: 2, offset:0 }}>
                     <Row>
-                        {show_req ? group_req.map((req) => <MDBContainer>
+                        {show_req ? redux_data.group_req.map((req) => <MDBContainer>
                             <MDBCard><MDBCardBody>{req}
                                     <FaCheck onClick={() => groupApprove(req)} style={{color: 'green', cursor: 'pointer'}}/>
                                 </MDBCardBody></MDBCard>
