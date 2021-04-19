@@ -47,6 +47,7 @@ const userInfo = new Schema({
     lname: {type: String, required: true},
     email:   {type: String, required: true, unique: true},
     password:   {type: String, required: true},
+    phone: String,
     image: String,
     currency: String,
     language: String,
@@ -55,10 +56,11 @@ const userInfo = new Schema({
 const i_Expense = new Schema({
     lender_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     borrow_id: { type: Schema.Types.ObjectId, ref: 'User', required: true},
-    group_id: {type: Schema.Types.ObjectId, ref: 'Group', required: true},
-    expense_id: {type: Schema.Types.ObjectId, ref: 'gExpense', required: true},
+    group_id: {type: Schema.Types.ObjectId, ref: 'Group'},
+    expense_id: {type: Schema.Types.ObjectId, ref: 'gExpense'},
     expense_name: {type: String, required: true},
     expense: {type: Number, required: true},
+    date: {type: Date, required: true},
 })
 const g_Expense = new Schema({
     date: {type: Date, required: true},
@@ -286,6 +288,7 @@ app.post('/profile/initialPull', function(req,res){
                     currency: 'currency' in user ? user.currency : USD, 
                     timezone: 'timezone' in user ? user.timezone : null, 
                     language: 'language' in user ? user.language : null, }
+                //endData.serialize()
                 res.end(JSON.stringify(endData));
             }
             else {
@@ -293,7 +296,7 @@ app.post('/profile/initialPull', function(req,res){
                 res.writeHead(204,{
                     'Content-Type' : 'text/plain'
                 })
-                res.end("Invalid Credentials")
+                res.end(JSON.stringify({message: "Invalid Credentials"}))
             }
         })
     }
@@ -332,47 +335,69 @@ app.post('/profile/update', async function(req,res){
         })
     }
     else{
-        console.log(id)
-        console.log(field, " ", value)
         const val = await User.findById(id)
-        console.log(val)
-        val.update({field : value }).then((result,err) => {
-            if (!err){
-                console.log(val)
-                console.log(err)
-                console.log(result)
-                res.writeHead(200,{
-                    'Content-Type' : 'text/plain'
-                })
-                res.end("Successful Submission");    
+        switch (field){
+            case 'name':{
+                let name_list = value.split(" ")
+                val.lname = ''
+                for (let i in name_list){
+                    if (i==0){
+                        val.fname = name_list[0]
+                    }
+                    else if (i == 1){
+                        val.lname = name_list[1]
+                    }
+                    else{
+                        val.lname = val.lname + " " + name_list[i]
+                    }
+                }
+                break
             }
-            else {
+            case 'email': {
+                val.email = value
+                break
+            }
+            case 'phone': {
+                val.phone = value
+                break
+            }
+            case 'currency':{
+                val.currency = value
+                break;
+              }
+            case 'timezone':{
+                val.timezone = value
+                break;
+              }
+            case 'language':{
+                val.language = value
+                break;
+            }
+            default:
+                break;
+        }
+        console.log(field, " is a field", value)
+        console.log(val)
+        val.save((err) => {
+            if ( err && err.code !== 11000 ) {
                 console.log(err)
-                console.log(result)
                 res.writeHead(204,{
                     'Content-Type' : 'text/plain'
                 })
                 res.end("Issue with data base")
+                return
             }
+            if ( err && err.code === 11000 ) {
+                req.flash('error', 'User already exists');
+                res.redirect('/signup');
+                return;
+            }
+            res.writeHead(200,{
+                'Content-Type' : 'text/plain'
+            })
+            res.end("Successful Submission"); 
+
         })
-        // User.updateOne({_id:id},{$set: {field : value }}).then((result,err) => {
-        //     if (!err){
-        //         console.log(err)
-        //         console.log(result)
-        //         res.writeHead(200,{
-        //             'Content-Type' : 'text/plain'
-        //         })
-        //         res.end("Successful Submission");    
-        //     }
-        //     else {
-        //         console.log(err)
-        //         console.log(result)
-        //         res.writeHead(204,{
-        //             'Content-Type' : 'text/plain'
-        //         })
-        //         res.end("Issue with data base")
-        //     }
-        // })
     }
 })
 
@@ -918,7 +943,7 @@ app.post('/groupChange', async function(req,res) {
     
 })
 
-app.post('/pullRecent', function(req,res){
+app.post('/pullRecent', async function(req,res){
     const id = get_id(req.body.token)
     if (!id){
         res.writeHead(203,{
@@ -929,65 +954,118 @@ app.post('/pullRecent', function(req,res){
     }
     let group_ids = '';
     let group_list = []
-    let sqlQuery = `SELECT T1.group_id as gid, T2.group_name AS name 
+    if (false){
+        let sqlQuery = `SELECT T1.group_id as gid, T2.group_name AS name 
                     FROM groupMem AS T1 LEFT JOIN groupInfo AS T2 ON T1.group_id = T2.group_ID 
                     WHERE T1.member_id = ${id} AND T1.active='active';`
-    console.log(sqlQuery)
-    db.query(sqlQuery, (err, result, fields) => {
-        if (!err){
-            console.log(result)
-            for (let i in result){
-                group_ids = group_ids + `${result[i].gid}, `
-                group_list = [...group_list, {id: result[i].gid, name:result[i].name}]
-            } 
-            group_ids = group_ids.substring(0,group_ids.length-2);
-            sqlQuery = `SELECT T1.group_id AS gid, T1.date AS date, T1.amount AS amt, T1.shares as share, T1.expense_name AS exp_name, T1.payee_id as pid, T2.fname AS name
-                        FROM gExpense AS T1 LEFT JOIN userInfo AS T2 ON T1.payee_id = T2.id
-                        WHERE T1.expense_id = ANY (SELECT expense_id FROM iExpense WHERE lender_id = ${id} OR borrow_id = ${id});`
-            console.log(sqlQuery)
-            db.query(sqlQuery, (err, result, fields) => {
-                if (!err){
-                    let expense_data = [];
-                    console.log(result)
-                    for (let i in result){
-                        group_name = '';
-                        for (let j in group_list){
-                            if (result[i].gid === group_list[j].id){
-                                group_name = group_list[j].name
-                                break
+        console.log(sqlQuery)
+        db.query(sqlQuery, (err, result, fields) => {
+            if (!err){
+                console.log(result)
+                for (let i in result){
+                    group_ids = group_ids + `${result[i].gid}, `
+                    group_list = [...group_list, {id: result[i].gid, name:result[i].name}]
+                } 
+                group_ids = group_ids.substring(0,group_ids.length-2);
+                sqlQuery = `SELECT T1.group_id AS gid, T1.date AS date, T1.amount AS amt, T1.shares as share, T1.expense_name AS exp_name, T1.payee_id as pid, T2.fname AS name
+                            FROM gExpense AS T1 LEFT JOIN userInfo AS T2 ON T1.payee_id = T2.id
+                            WHERE T1.expense_id = ANY (SELECT expense_id FROM iExpense WHERE lender_id = ${id} OR borrow_id = ${id});`
+                console.log(sqlQuery)
+                db.query(sqlQuery, (err, result, fields) => {
+                    if (!err){
+                        let expense_data = [];
+                        console.log(result)
+                        for (let i in result){
+                            group_name = '';
+                            for (let j in group_list){
+                                if (result[i].gid === group_list[j].id){
+                                    group_name = group_list[j].name
+                                    break
+                                }
+                            }
+                            if (result[i].pid === id){
+                                expense_data.push({uname: result[i].name, ename: result[i].exp_name, gname: group_name, color: "green", date:result[i].date, amount:result[i].amt, share:result[i].share})
+                            }
+                            else{
+                                expense_data.push({uname: result[i].name, ename: result[i].exp_name, gname: group_name, color: "red", date:result[i].date, amount:result[i].amt, share:result[i].share})
                             }
                         }
-                        if (result[i].pid === id){
-                            expense_data.push({uname: result[i].name, ename: result[i].exp_name, gname: group_name, color: "green", date:result[i].date, amount:result[i].amt, share:result[i].share})
-                        }
-                        else{
-                            expense_data.push({uname: result[i].name, ename: result[i].exp_name, gname: group_name, color: "red", date:result[i].date, amount:result[i].amt, share:result[i].share})
-                        }
+                        res.writeHead(200,{
+                            'Content-Type' : 'text/plain'
+                        })
+                        const finaldata = {expense: expense_data}
+                        console.log(finaldata)
+                        res.end(JSON.stringify(finaldata))
                     }
-                    res.writeHead(200,{
-                        'Content-Type' : 'text/plain'
-                    })
-                    const finaldata = {expense: expense_data}
-                    console.log(finaldata)
-                    res.end(JSON.stringify(finaldata))
-                }
-                else {
-                    console.log(err)
-                    res.writeHead(204,{
-                        'Content-Type' : 'text/plain'
-                    })
-                    res.end("Issue with data base")
-                }
-            })
+                    else {
+                        console.log(err)
+                        res.writeHead(204,{
+                            'Content-Type' : 'text/plain'
+                        })
+                        res.end("Issue with data base")
+                    }
+                })
+            }
+            else {
+                console.log(err)
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Issue with data base")
+            }
+        })
+    }
+    else {
+        console.log(id)
+        let expense_data = []
+        let expense_ids = []
+        const expense = await iExpense.find({$or: [{lender_id: id},{borrow_id: id}]}).populate('lender_id').populate('group_id').populate('expense_id')
+        // .then((result,err) => {
+        //     if(err){
+        //         console.log(err)
+        //         res.writeHead(204,{
+        //                 'Content-Type' : 'text/plain'
+        //         })
+        //         res.end("Issue with data base")
+        //     }
+        //     else {
+        //         console.log(result)
+        //     }
+        // })
+        for (let i in expense){
+            if (expense_ids.includes(expense[i].expense_id._id.toString())){
+                break
+            }
+            if (expense[i].lender_id._id.toString() == id){
+                expense_data.push({uname: expense[i].lender_id.fname, 
+                                    ename: expense[i].expense_name, 
+                                    gname: expense[i].group_id.group_name, 
+                                    color: "green", 
+                                    date:expense[i].expense_id.date, 
+                                    amount: expense[i].expense_id.amount - expense[i].expense, 
+                                    share:expense[i].expense_id.shares
+                                })
+            }
+            else {
+                expense_data.push({uname: expense[i].lender_id.fname, 
+                    ename: expense[i].expense_name, 
+                    gname: expense[i].group_id.group_name, 
+                    color: "red", 
+                    date:expense[i].expense_id.date, 
+                    amount: expense[i].expense, 
+                    share:expense[i].expense_id.shares
+                })
+            }
+            expense_ids.push(expense[i].expense_id._id.toString())
         }
-        else {
-            console.log(err)
-            res.writeHead(204,{
-                'Content-Type' : 'text/plain'
-            })
-            res.end("Issue with data base")
-        }
-    })
+        res.writeHead(200,{
+            'Content-Type' : 'text/plain'
+        })
+        const finaldata = {expense: expense_data}
+        console.log(finaldata)
+        res.end(JSON.stringify(finaldata))
+    }
+    
 })
 
 app.post('/getDash', async function(req,res){
@@ -1117,7 +1195,8 @@ app.post('/settleUp', function(req,res){
         res.end("Token has expired")
         return
     }
-    settle_values = ''
+    if (false){
+        settle_values = ''
     const settle_data = req.body.settle
     let keys = Object.keys(settle_data)
     for (let i in keys){
@@ -1147,6 +1226,8 @@ app.post('/settleUp', function(req,res){
             res.end("Issue with data base")
         }
     })
+    }
+    
 })
 
 app.post('/groupSuggest', async function(req,res) {
@@ -1191,7 +1272,7 @@ app.post('/groupSuggest', async function(req,res) {
     
 })
 
-app.post('/groupExit',function(req,res) {
+app.post('/groupExit',async function(req,res) {
     const id = get_id(req.body.token)
     if (!id){
         res.writeHead(204,{
@@ -1202,52 +1283,97 @@ app.post('/groupExit',function(req,res) {
     }
     console.log(req.body)
     const group_id = req.body.group_id;
-    let sqlQuery = `Select * FROM iExpense WHERE group_id = ${group_id} OR group_id = 0`
-    db.query(sqlQuery, (err, result) => {
-        if (!err){
-            let balance = 0.0
-            for (let i in result){
-                if (result[i].lender_id === result[i].borrow_id){
-                    continue
+    if (false) {
+        let sqlQuery = `Select * FROM iExpense WHERE group_id = ${group_id} OR group_id = 0`
+        db.query(sqlQuery, (err, result) => {
+            if (!err){
+                let balance = 0.0
+                for (let i in result){
+                    if (result[i].lender_id === result[i].borrow_id){
+                        continue
+                    }
+                    if (result[i].lender_id === id){
+                        balance =  balance + result[i].expense
+                    }
+                    else if (result[i].borrow_id === id){
+                        balance = balance - result[i].expense
+                    }
                 }
-                if (result[i].lender_id === id){
-                    balance =  balance + result[i].expense
+                if (balance < 0){
+                    balance = balance * -1
                 }
-                else if (result[i].borrow_id === id){
-                    balance = balance - result[i].expense
+                if (balance > 0.01){
+                    const data = {message: "Group Not Settled"}
+                    res.writeHead(200,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end(JSON.stringify(data));
                 }
-            }
-            if (balance < 0){
-                balance = balance * -1
-            }
-            if (balance > 0.01){
-                const data = {message: "Group Not Settled"}
-                res.writeHead(200,{
-                    'Content-Type' : 'text/plain'
-                })
-                res.end(JSON.stringify(data));
+                else {
+                    sqlQuery = `DELETE FROM groupMem WHERE group_id = ${group_id} AND member_id = ${id}`
+                    db.query(sqlQuery, (err, result) => {
+                        if (!err){
+                            const data = {message: "Group Settled"}
+                            res.writeHead(200,{
+                                'Content-Type' : 'text/plain'
+                            })
+                            res.end(JSON.stringify(data));
+                        }
+                    });
+                }   
             }
             else {
-                sqlQuery = `DELETE FROM groupMem WHERE group_id = ${group_id} AND member_id = ${id}`
-                db.query(sqlQuery, (err, result) => {
-                    if (!err){
-                        const data = {message: "Group Settled"}
-                        res.writeHead(200,{
-                            'Content-Type' : 'text/plain'
-                        })
-                        res.end(JSON.stringify(data));
-                    }
-                });
-            }   
+                console.log(err)
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Issue with data base")
+            }
+        })
+    }
+    else {
+        const ind_expense = await iExpense.find({group_id: group_id})
+        let balance = 0.0
+        for (let i in ind_expense){
+            if (ind_expense[i].lender_id.toString == id){
+                balance = balance + ind_expense[i].expense
+            }
+            else if (ind_expense[i].borrow_id.toString == id){
+                balance = balance - ind_expense[i].expense
+            }
         }
-        else {
-            console.log(err)
-            res.writeHead(204,{
+        if (balance < 0){
+            balance = balance * -1
+        }
+        if (balance > 0.01){
+            const data = {message: "Group Not Settled"}
+            res.writeHead(200,{
                 'Content-Type' : 'text/plain'
             })
-            res.end("Issue with data base")
+            res.end(JSON.stringify(data));
         }
-    })
+        else {
+            Group.findByIdAndUpdate(
+                req.body.group_id,
+                {$pull: {member: id}})
+            .then((result,err) => {
+                if(err){
+                    console.log(err)
+                    res.writeHead(204,{
+                            'Content-Type' : 'text/plain'
+                    })
+                    res.end("Issue with data base")
+                }
+                else{
+                    const data = {message: "Group Settled"}
+                    res.writeHead(200,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end(JSON.stringify(data));
+                }
+            })
+        }
+    }
 })
 
 app.listen(3001, () => {

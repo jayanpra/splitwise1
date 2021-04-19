@@ -10,11 +10,10 @@ import AddExpense from '../common/AddExpense';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from "react-redux";
-import { setSingleData, setRData } from '../../reducer/ProfileReducer'
+import { setSingleData, removeError } from '../../reducer/ProfileReducer'
+import {get_data, send_update} from '../../actions/profileActions'
 
 const Profile = () => {
-  const dispatch = useDispatch();
-  const redux_data = useSelector(state => state.profile);
   const currency = ['USD', 'KWD', 'BHD', 'GBP', 'EUR', 'CAD'];
   const timezone = ['UTC - 12:00',
     'UTC - 11:00',
@@ -51,7 +50,8 @@ const Profile = () => {
     language: null,
     image: null,
   });
-
+  const dispatch = useDispatch();
+  const redux_data = useSelector(state => state.profile);
   const [expTog, setToggle] = useState(false)
   const [delayed, noSession] = useState(false)
   const notify = (message) => toast(`${message} changed sucessfully!`);
@@ -61,35 +61,39 @@ const Profile = () => {
   }
 
   useEffect(() => {
-    if (data.name === null) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const serverData = { 'token': token };
-        axios.defaults.withCredentials = true;
-        axios.post('http://localhost:3001/profile/initialPull', serverData)
-          .then((response) => {
-            if (response.status === 200) {
-              localStorage.setItem("currency", response.data.currency)
-              localStorage.setItem("fname", response.data.name.split( )[0])
-              console.log(response.data)
-              dispatch( setRData({pname: response.data.name, 
-                                email: response.data.email, 
-                                phone: response.data.phone,
-                                pic_loc: "http://localhost:3001/"+response.data.pic,
-                                currency: response.data.currency,
-                                timezone: response.data.timezone,
-                                language: response.data.language}))
-            }
-          })
-          .then((response) => {
-            return <Redirect to='/landing'/>
-          }); 
-      }
-      else {
-        noSession(true)
-      }
-    }
-  },[data]);
+    dispatch(get_data(localStorage.getItem('token')))
+  },[]);
+
+  // useEffect(() => {
+  //   if (data.name === null) {
+  //     const token = localStorage.getItem('token');
+  //     if (token) {
+  //       const serverData = { 'token': token };
+  //       axios.defaults.withCredentials = true;
+  //       axios.post('http://localhost:3001/profile/initialPull', serverData)
+  //         .then((response) => {
+  //           if (response.status === 200) {
+  //             localStorage.setItem("currency", response.data.currency)
+  //             localStorage.setItem("fname", response.data.name.split( )[0])
+  //             console.log(response.data)
+  //             dispatch( setRData({pname: response.data.name, 
+  //                               email: response.data.email, 
+  //                               phone: response.data.phone,
+  //                               pic_loc: "http://localhost:3001/"+response.data.pic,
+  //                               currency: response.data.currency,
+  //                               timezone: response.data.timezone,
+  //                               language: response.data.language}))
+  //           }
+  //         })
+  //         .then((response) => {
+  //           return <Redirect to='/landing'/>
+  //         }); 
+  //     }
+  //     else {
+  //       noSession(true)
+  //     }
+  //   }
+  // },[data]);
 
   
   const onImageChange = (event) => {
@@ -118,8 +122,7 @@ const Profile = () => {
           console.log("DataBase Issue")
       }); 
   }
-  const onProfileChange = (value) => {
-    console.log(value)
+  const onProfileChange = async (value) => {
     if (value.type === 'email') {
       const email_val = /\S+@\S+\.\S+/
         if (!email_val.test(value.value)){
@@ -135,18 +138,27 @@ const Profile = () => {
         }
     }
     const pckg = {token:localStorage.getItem('token'), data: value}
-    axios.defaults.withCredentials = true;
-    axios.post('http://localhost:3001/profile/update', pckg)
-      .then((response) => {
-        if (response.status === 200) {
-          console.log("Records Saved")
-          dispatch(setSingleData({key:value.type, value: value.value}))
-          notify(value.type)
-        }
-      })
-      .then((response) => {
-          console.log("DataBase Issue")
-      }); 
+    await dispatch(send_update(pckg));
+    console.log(redux_data.error)
+    if (redux_data.error) {
+      notify(redux_data.feed)
+      removeError()
+    }
+    else {
+      notify(value.type)
+    }
+    // axios.defaults.withCredentials = true;
+    // axios.post('http://localhost:3001/profile/update', pckg)
+    //   .then((response) => {
+    //     if (response.status === 200) {
+    //       console.log("Records Saved")
+    //       dispatch(setSingleData({key:value.type, value: value.value}))
+    //       notify(value.type)
+    //     }
+    //   })
+    //   .then((response) => {
+    //       console.log("DataBase Issue")
+    //   }); 
   }
   const showAddExpense = () => {
     setToggle(!expTog)

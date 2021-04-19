@@ -6,12 +6,17 @@ import RecentTab from '../common/RecentTab'
 import { MDBCard, MDBCardBody, MDBCardTitle, MDBContainer, MDBBtn } from 'mdbreact';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
+import ReactPaginate from 'react-paginate';
 
 const Recent = () => {
     const [user_list, changeList] = useState([])
     const [initial_pull, pullExit] = useState(true)
     const [delayed, noSession] = useState(false)
     const [btn, nameChange] = useState("Last Activity First")
+    const [offset, setOffset] = useState(0);
+    const [data, setData] = useState([]);
+    const [perPage] = useState(10);
+    const [pageCount, setPageCount] = useState(0)
     useEffect(() => {
         if(initial_pull)
         {
@@ -22,8 +27,13 @@ const Recent = () => {
                 axios.post('http://localhost:3001/pullRecent', serverData)
                 .then((response) => {
                     if (response.status === 200) {
+                        console.log(response.data)
                         pullExit(false)
                         changeList([...response.data.expense])
+                        const slice = data.slice(offset, offset + perPage)
+                        const postData = slice.map(pd => <div><RecentTab body={pd}/><br/><br/><br/></div>)
+                        setData(postData)
+                        setPageCount(Math.ceil(data.length / perPage))
                     }
                 })
                 .then((response) => {
@@ -46,6 +56,10 @@ const Recent = () => {
             nameChange("Last Activity First")
         }
     }
+    const handlePageClick = (e) => {
+        const selectedPage = e.selected;
+        setOffset(selectedPage + 1)
+    };
     return (
         <div>
             {delayed ? <Redirect to='/landing'/>: <br/>}
@@ -68,9 +82,19 @@ const Recent = () => {
                         </MDBCardBody>
                     </MDBCard>
                 </MDBContainer><br/><br/>
-                    {user_list.map((user) => 
-                       <div><RecentTab body={user}/><br/><br/><br/></div>
-                    )}
+                {data}
+                <ReactPaginate
+                             previousLabel={"prev"}
+                             nextLabel={"next"}
+                             breakLabel={"..."}
+                             breakClassName={"break-me"}
+                             pageCount={pageCount}
+                             marginPagesDisplayed={2}
+                             pageRangeDisplayed={5}
+                             onPageChange={handlePageClick}
+                             containerClassName={"pagination"}
+                             subContainerClassName={"pages pagination"}
+                             activeClassName={"active"}/>
                 </Col>
             </Row>
             </Container>
