@@ -200,7 +200,7 @@ const GroupPage = () => {
             {delayed ? <Redirect to='/landing'/>: null}
             <AddExpense open={expTog} onToggle={showAddExpense}/>
             <Navigator loggedin={true}/>
-            <Container fluid style={{ backgroundColor: 'lightblue', position: "fixed", top: 0, left:0, height: "100%" }}>
+            <Container fluid style={{ backgroundColor: 'lightblue', position: "fixed", top: '2%', left:0, height: "100%" }}>
             <Row style={{marginTop: "4%"}}>
                 <Col sm={2}>
                     <GroupSide LogOut={LogOut} groupname={redux_data.group_name} launchExpense={showAddExpense} changeGroup={changeGroup}/>

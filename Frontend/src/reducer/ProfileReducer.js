@@ -75,19 +75,23 @@ export const ProfileReducer = createSlice({
     },
     extraReducers: {
       [get_data.fulfilled] : (state,action) => {
-        console.log(action.payload)
-        state.pname = action.payload.name
-        state.email = action.payload.email
-        if (action.payload.phone !== null) {
-          state.phone = `(${action.payload.phone.substring(0,3)}) ${action.payload.phone.substring(3,6)} ${action.payload.phone.substring(6,10)}`
+        
+        if (action.payload === null){
+          return
         }
-        else {
-          state.phone = action.payload.phone
-        }
-        state.pic_loc = action.payload.pic_loc
-        state.currency =  action.payload.currency
-        state.timezone = action.payload.timezone 
-        state.language = action.payload.language
+        const response_data = action.payload
+        state.pname = response_data.name
+          state.email = response_data.email
+          if (typeof response_data.phone === 'string') {
+            state.phone = `(${response_data.phone.substring(0,3)}) ${response_data.phone.substring(3,6)} ${response_data.phone.substring(6,10)}`
+          }
+          else {
+            state.phone = response_data.phone
+          }
+          state.pic_loc = response_data.pic_loc
+          state.currency =  response_data.currency
+          state.timezone = response_data.timezone 
+          state.language = response_data.language
       },
       [send_update.fulfilled] : (state, action) => {
         console.log(action.payload)

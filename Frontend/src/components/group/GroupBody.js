@@ -2,14 +2,13 @@ import React from 'react'
 import { MDBCard, MDBCardBody, MDBCardTitle,  MDBContainer, MDBBtn} from 'mdbreact';
 import DashItems from '../common/DashItems';
 import ToggleBox from '../common/ToggleBox'
-import background from "../common/header.jpeg"
 
 const GroupBody = ({name, expense_list,onChange, exitGroup}) => {
     console.log(expense_list)
     return (
         <div>
             <MDBContainer style={{width:"80%", height:"100%"}}>
-                <MDBCard style={{backgroundImage: `url(${background})`}}>
+                <MDBCard style={{backgroundColor: 'MediumSeaGreen'}}>
                 <MDBCardBody style={{color:"white"}}>
                     <MDBCardTitle><ToggleBox heading="Your Group" value={name} onChange={onChange} color='white' edit_color='white' cross_color='white' tick_color='white'/></MDBCardTitle>
                     <MDBBtn style={{ backgroundColor: 'red'}} onClick={() => exitGroup(name)}> Exit group</MDBBtn>

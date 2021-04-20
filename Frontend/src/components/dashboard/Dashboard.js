@@ -4,32 +4,15 @@ import Navigator from '../landing/Navigator';
 import GroupSide from '../common/GroupSide'
 import DashEntry from '../common/DashEntry'
 import { MDBCard, MDBCardBody, MDBCardTitle, MDBBtn, MDBCardText, MDBCol, MDBRow, MDBContainer } from 'mdbreact';
-import axios from 'axios';
+//import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import { useSelector, useDispatch } from "react-redux";
-import {addBorrow, addLend, addDebts, addCredits, addFriend} from '../../reducer/DashReducer'
+import {get_dash, settle_up} from '../../actions/dashAction';
 
 const Dashboard = () => {
     const dispatch = useDispatch();
     const redux_data = useSelector(state => state.dash);
-    const [initial_pull, pullExit] = useState(true)
-    const [friends, indSettle] = useState({})
     const [delayed, noSession] = useState(false)
-
-    const assess_record = (ele, list) => {
-        console.log("In Here")
-        for (let i in list) {
-            if (list[i].color === "green"){
-                //getMoney((state) => [...state, {color:"green", expense:list[i].expense, borrower: list[i].person, exp_name: list[i].ename}])
-                dispatch(addLend({color:"green", expense:list[i].expense, borrower: list[i].person, exp_name: list[i].ename}))
-
-            }
-            else{
-                //sendMoney((state) => [...state, {color:"red", expense:list[i].expense, lender: list[i].person, exp_name: list[i].ename}])
-                dispatch(addBorrow({color:"red", expense:list[i].expense, lender: list[i].person, exp_name: list[i].ename}))
-            }
-        }
-    }
 
     const LogOut = () => {
         noSession(true)
@@ -37,18 +20,20 @@ const Dashboard = () => {
 
     const settleUp = () => {
         const token = localStorage.getItem('token');
+        dispatch(settle_up())
         if (token) {
             const serverData = { 'token': token, settle: redux_data.friends.settle };
-            axios.defaults.withCredentials = true;
-            axios.post('http://localhost:3001/settleUp', serverData)
-            .then((response) => {
-                if (response.status === 200) {
-                    pullExit(true)
-                }
-            })
-            .then((response) => {
+            dispatch(settle_up(serverData))
+            // axios.defaults.withCredentials = true;
+            // axios.post('http://localhost:3001/settleUp', serverData)
+            // .then((response) => {
+            //     if (response.status === 200) {
+            //         window.location.reload(false)
+            //     }
+            // })
+            // .then((response) => {
                 
-            }); 
+            // }); 
         }
         else {
             noSession(true)
@@ -56,45 +41,9 @@ const Dashboard = () => {
     }
 
     useEffect(() => {
-        if(initial_pull)
-        {
-            const token = localStorage.getItem('token');
-            if (token) {
-                const serverData = { 'token': token };
-                axios.defaults.withCredentials = true;
-                axios.post('http://localhost:3001/getDash', serverData)
-                .then((response) => {
-                    if (response.status === 200) {
-                        pullExit(false)
-                        let keys = Object.keys(response.data.accounts)
-                        for (let i in keys){
-                            assess_record(keys[i], response.data.accounts[keys[i]])
-                        }
-                        console.log(response.data.balance)
-                        indSettle({...friends, settle:response.data.balance})
-                        dispatch(addFriend({settle:response.data.balance}))
-                        let keys2 = Object.keys(response.data.balance)
-                        for (let j in keys2) {
-                            if (response.data.balance[keys2[j]] > 0){
-                                //addMoney((balance) => balance + response.data.balance[keys2[j]])
-                                dispatch(addCredits(response.data.balance[keys2[j]]))
-                            }
-                            else {
-                                //subMoney((balance) => balance + (response.data.balance[keys2[j]] * -1))
-                                dispatch(addDebts(response.data.balance[keys2[j]] * -1))
-                            }
-                        }
-                    }
-                })
-                .then((response) => {
-                    console.log("err", response)
-                }); 
-            }
-            else {
-                noSession(true)
-            }
-        }
-    },[initial_pull])
+        dispatch(get_dash({token: localStorage.getItem('token')}))
+    },[])
+
     return (
         <div>
             {delayed ? <Redirect to='/landing'/>: null}
@@ -111,31 +60,31 @@ const Dashboard = () => {
                 <Col sm={6}>
                 <MDBRow>
                 <MDBContainer style={{width:"100%", height:"10%"}}>
-                    <MDBCard style={{backgroundColor:"DodgerBlue"}}>
+                    <MDBCard style={{backgroundColor:"seagreen"}}>
                         <MDBCardBody>
                             <MDBCardTitle style={{textalign:"left"}}>DashBoard</MDBCardTitle>
-                            <MDBBtn onClick={settleUp} style={{backgroundColor:"lightgreen", top:0, right:0}}>SettleUp</MDBBtn>
+                            <MDBBtn onClick={settleUp} style={{backgroundColor:"slateblue", top:0, right:0}}>SettleUp</MDBBtn>
                             <MDBCardText>
                                 <MDBRow>
                                     <MDBCol>
                                         <p>Total Balance</p>
-                                        {(redux_data.amt_plus - redux_data.amt_minus) >= 0 ? <p style={{color:"green"}}>
+                                        {(redux_data.amt_plus - redux_data.amt_minus) >= 0 ? <p style={{color:"white", backgroundColor:"Limegreen" }}>
                                             {localStorage.getItem("currency")} {(redux_data.amt_plus - redux_data.amt_minus).toFixed(2)}
                                         </p>:
-                                        <p style={{color:"red"}}>
+                                        <p style={{color:"white", backgroundColor:"firebrick"}}>
                                             {localStorage.getItem("currency")} {(redux_data.amt_plus - redux_data.amt_minus).toFixed(2)}
                                         </p>
                                         }   
                                     </MDBCol>
                                     <MDBCol>
                                         <p>You Owe</p>
-                                        <p style={{color:"red"}}>
+                                        <p style={{color:"white", backgroundColor:"firebrick" }}>
                                             {localStorage.getItem("currency")} {redux_data.amt_minus.toFixed(2)}
                                         </p>
                                     </MDBCol>
                                     <MDBCol>
                                         <p>You Are Owed</p>
-                                        <p style={{color:"green"}}>
+                                        <p style={{color:"white", backgroundColor:"Limegreen" }}>
                                             {localStorage.getItem("currency")} {redux_data.amt_plus.toFixed(2)}
                                         </p>
                                     </MDBCol>
@@ -149,7 +98,7 @@ const Dashboard = () => {
                     <MDBCol>
                         <MDBRow>
                         <MDBContainer style={{width:"100%", height:"2%", marginTop: "2%"}}>
-                            <MDBCard style={{backgroundColor:"MediumSeaGreen"}}>
+                            <MDBCard style={{backgroundColor:"LimeGreen"}}>
                             <MDBCardBody>
                                 <MDBCardTitle style={{textalign:"left"}}>Your Asset List</MDBCardTitle>
                                 </MDBCardBody>
@@ -163,7 +112,7 @@ const Dashboard = () => {
                     <MDBCol>
                         <MDBRow>
                         <MDBContainer style={{width:"100%",height:"2%", marginTop: "2%"}}>
-                            <MDBCard style={{backgroundColor:"Tomato"}}>
+                            <MDBCard style={{backgroundColor:"FireBrick"}}>
                             <MDBCardBody>
                                 <MDBCardTitle style={{textalign:"left"}}>Your Liablity List</MDBCardTitle>
                                 </MDBCardBody>

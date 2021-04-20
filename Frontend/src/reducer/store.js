@@ -4,6 +4,7 @@ import ProfileReducer from './ProfileReducer'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import RegisterReducer from './RegisterReducer'
 import GroupReducer from './GroupReducer'
+import CommentReducer from './CommentReducer'
 
 export default configureStore({
     middleware: getDefaultMiddleware({
@@ -21,5 +22,6 @@ export default configureStore({
         dash: DashReducer,
         register: RegisterReducer,
         group: GroupReducer,
+        comment: CommentReducer,
     },
 }, composeWithDevTools());

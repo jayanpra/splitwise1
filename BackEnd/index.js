@@ -379,6 +379,7 @@ app.post('/profile/update', async function(req,res){
         console.log(field, " is a field", value)
         console.log(val)
         val.save((err) => {
+            console.log
             if ( err && err.code !== 11000 ) {
                 console.log(err)
                 res.writeHead(204,{
@@ -388,9 +389,11 @@ app.post('/profile/update', async function(req,res){
                 return
             }
             if ( err && err.code === 11000 ) {
-                req.flash('error', 'User already exists');
-                res.redirect('/signup');
-                return;
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Issue with data base")
+                return
             }
             res.writeHead(200,{
                 'Content-Type' : 'text/plain'
@@ -662,29 +665,95 @@ app.post('/groupFill', async function(req,res) {
             let expenses = []
             for (let i in group[0].expense){
                 if (group[0].expense[i].payee._id == id) {
-                    expenses.push({ expense_name: group[0].expense[i].expense_name, 
+                    expenses.push({ expense_id: group[0].expense[i]._id,
+                                    expense_name: group[0].expense[i].expense_name, 
                                     date:group[0].expense[i].date, 
                                     shares:group[0].expense[i].shares, 
                                     payee: group[0].expense[i].payee.fname, 
                                     amount: group[0].expense[i].amount, color:'green'})
                 }
                 else{
-                    expenses.push({ expense_name: group[0].expense[i].expense_name, 
+                    expenses.push({ expense_id: group[0].expense[i]._id,
+                        expense_name: group[0].expense[i].expense_name, 
                         date:group[0].expense[i].date, 
                         shares:group[0].expense[i].shares, 
                         payee: group[0].expense[i].payee.fname, 
                         amount: group[0].expense[i].amount, color:'red'})
                 }
-                const finaldata = {group:group_list, expense: expenses}
-                res.writeHead(200,{
-                'Content-Type' : 'text/plain'
-                })
-                console.log(finaldata)
-                res.end(JSON.stringify(finaldata))
             }
+            const finaldata = {group:group_list, expense: expenses}
+            res.writeHead(200,{
+                'Content-Type' : 'text/plain'
+            })
+            console.log(finaldata)
+            res.end(JSON.stringify(finaldata))
         }
     }
     
+})
+
+app.post('/getcomment', async function(req,res){
+    const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(203,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
+    if (false){
+
+    }
+    else{
+        console.log(req.body)
+        const c_Expense = await gExpense.find({_id: req.body.expense_id}).populate({path:'comment', populate:{path:'author'}})
+        let comments = []
+        console.log(c_Expense)
+        if (c_Expense[0]){
+            for (let i in c_Expense[0].comment){
+                comments.push({text: c_Expense[0].comment[i].comment, author: c_Expense[0].comment[i].author.fname + " " + c_Expense[0].comment[i].author.lname})
+            }
+        }
+        const finaldata = {comment_list: comments}
+        res.writeHead(200,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end(JSON.stringify(finaldata))
+    }
+})
+
+app.post('/addcomment', function(req,res){
+    const id = get_id(req.body.token)
+    if (!id){
+        res.writeHead(203,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
+    if (false){
+
+    }
+    else{
+        const comment = {comment: req.body.text, author: id}
+
+        const c_Expense = gExpense.findByIdAndUpdate(
+            req.body.expense_id,
+            {$push: {comment: comment}}).then((result,err) => {
+                if(err){
+                    res.writeHead(204,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("database_issue")
+                }
+                else{
+                    res.writeHead(200,{
+                        'Content-Type' : 'text/plain'
+                    })
+                    res.end("sucessfully updated")
+                }
+            })
+    }
 })
 
 app.post('/altergroup',function(req,res) {
@@ -842,6 +911,7 @@ app.post('/expenseAdd',async function(req,res) {
                 expense_id: g_exp._id,
                 expense_name: req.body.expense_name,
                 expense: expense_per_person,
+                date: date_string,
             })
             i_exp.save()
         }
@@ -918,14 +988,16 @@ app.post('/groupChange', async function(req,res) {
         else {
             for (let i in group.expense){
                 if (group.expense[i].payee._id === id) {
-                    expenses.push({ expense_name: group.expense[i].exp_name, 
+                    expenses.push({ expense_id: group.expense[i]._id,
+                                    expense_name: group.expense[i].exp_name, 
                                     date:group.expense[i].date, 
                                     shares:group.expense[i].share, 
                                     payee: group.expense[i].payee.fname, 
                                     amount: group.expense[i].amount, color:'green'})
                 }
                 else{
-                    expenses.push({ expense_name: group.expense[i].exp_name, 
+                    expenses.push({ expense_id: group[0].expense[i]._id,
+                        expense_name: group.expense[i].exp_name, 
                         date:group.expense[i].date, 
                         shares:group.expense[i].share, 
                         payee: group.expense[i].payee.fname, 
@@ -1165,7 +1237,7 @@ app.post('/getDash', async function(req,res){
             else if (expense_list[i].lender_id._id == id){
                 if (expense_list[i].borrow_id._id in ledger) {
                     ledger[expense_list[i].borrow_id._id].push({color:"green", expense: expense_list[i].expense, person: expense_list[i].borrow_id.fname, ename: expense_list[i].expense_name})
-                    object[expense_list[i].borrow_id._id] = object[expense_list[i].borrow_id._id] - expense_list[i].expense
+                    object[expense_list[i].borrow_id._id] = object[expense_list[i].borrow_id._id] + expense_list[i].expense
                 }
                 else{
                     ledger[expense_list[i].borrow_id._id] = []
@@ -1187,6 +1259,7 @@ app.post('/getDash', async function(req,res){
 })
 
 app.post('/settleUp', function(req,res){
+    console.log(req.body)
     const id = get_id(req.body.token)
     if (!id){
         res.writeHead(203,{
@@ -1226,6 +1299,48 @@ app.post('/settleUp', function(req,res){
             res.end("Issue with data base")
         }
     })
+    }
+    else{
+        const settle_data = req.body.settle
+        const date_string = new Date().toISOString()
+        let settle_entry = []
+        let keys = Object.keys(settle_data)
+        for (let i in keys){
+            if (settle_data[keys[i]] > 0){
+                settle_entry.push({
+                    lender_id: keys[i],
+                    borrow_id: id,
+                    expense_name: 'Settle Up Amount',
+                    expense: settle_data[keys[i]],
+                    date: date_string,
+                })
+            }
+            else {
+                settle_entry.push({
+                    lender_id: keys[i],
+                    borrow_id: id,
+                    expense_name: 'Settle Up Amount',
+                    expense: settle_data[keys[i]] * -1,
+                    date: date_string,
+                })
+            }
+        }
+        iExpense.insertMany(settle_entry, (err,docs) => {
+            if (err){
+                console.log(err)
+                res.writeHead(204,{
+                    'Content-Type' : 'text/plain'
+                })
+                res.end("Issue with data base")
+            }
+            else {
+                console.log(docs)
+                res.writeHead(200,{
+                'Content-Type' : 'text/plain'
+                    })
+                res.end("Successful Submission");
+            }
+        })
     }
     
 })
