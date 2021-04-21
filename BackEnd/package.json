@@ -21,6 +21,8 @@
     "express-fileupload": "^1.2.1",
     "fs": "0.0.1-security",
     "jsonwebtoken": "^8.5.1",
+    "kafka": "^0.2.3",
+    "kafka-node": "^5.0.0",
     "kafkajs": "^1.15.0",
     "mongoose": "^5.12.2",
     "mysql": "^2.18.1",

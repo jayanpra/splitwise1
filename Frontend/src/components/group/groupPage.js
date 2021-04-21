@@ -197,7 +197,7 @@ const GroupPage = () => {
     return (
         <div>
             <ToastContainer />
-            {delayed ? <Redirect to='/landing'/>: null}
+            {delayed ? <div>{notify("Logging out")}<Redirect to='/landing'/></div>: null}
             <AddExpense open={expTog} onToggle={showAddExpense}/>
             <Navigator loggedin={true}/>
             <Container fluid style={{ backgroundColor: 'lightblue', position: "fixed", top: '2%', left:0, height: "100%" }}>

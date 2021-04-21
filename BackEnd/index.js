@@ -9,9 +9,15 @@ const jwtoken= require('jsonwebtoken');
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose')
-const {Kafka} = require('kafkajs')
+const kafka = require('./kafka/client')
 const dotenv = require('dotenv')
 const dbSQL = true
+const User = require('./models/userModel')
+const Group = require('./models/groupModel')
+const gExpense = require('./models/gExpenseModel')
+const iExpense = require('./models/iExpenseModel')
+const Member = require('./models/memberModel')
+const {GET_PROFILE} = require('./kafka/topics')
 
 
 app.set('view engine', 'ejs');
@@ -28,10 +34,10 @@ const db = mysql.createPool({
     password: "password",
     database: "splitwiseStorage"
 })
-const kafka = new Kafka({
-    clientId: "splitwise",
-    brokers: ['localhost:9091', 'localhost:9092']
-})
+// const kafka = new Kafka({
+//     clientId: "splitwise",
+//     brokers: ['localhost:9091', 'localhost:9092']
+// })
 
 mongoose.connect('mongodb+srv://jayant29:jayant29@splitwise.spixx.mongodb.net/splitwiseStorage?retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology:true},
     (req,res) => {
@@ -39,58 +45,6 @@ mongoose.connect('mongodb+srv://jayant29:jayant29@splitwise.spixx.mongodb.net/sp
     }
 )
 
-const Schema = mongoose.Schema;
-//const ObjectId = Schema.ObjectId;
-
-const userInfo = new Schema({
-    fname:  {type: String, required: true}, 
-    lname: {type: String, required: true},
-    email:   {type: String, required: true, unique: true},
-    password:   {type: String, required: true},
-    phone: String,
-    image: String,
-    currency: String,
-    language: String,
-    timezone: String,
-  });
-const i_Expense = new Schema({
-    lender_id: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    borrow_id: { type: Schema.Types.ObjectId, ref: 'User', required: true},
-    group_id: {type: Schema.Types.ObjectId, ref: 'Group'},
-    expense_id: {type: Schema.Types.ObjectId, ref: 'gExpense'},
-    expense_name: {type: String, required: true},
-    expense: {type: Number, required: true},
-    date: {type: Date, required: true},
-})
-const g_Expense = new Schema({
-    date: {type: Date, required: true},
-    payee: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    amount: {type: Number, required: true },
-    shares: {type: Number, required: true },
-    expense_name: { type: String, required: true},
-    comment: [{comment: { type: String, required: true}, author: { type: Schema.Types.ObjectId, ref: 'User', required: true }}],
-})
-
-const groupInfo = new Schema({
-    group_name: {type: String, required: true, unique: true},
-    group_pic: {type: String},
-    owner: { type: Schema.Types.ObjectId, ref: 'User' },
-    member: [{ type: Schema.Types.ObjectId, ref: 'User'}],
-    expense: [{ type: Schema.Types.ObjectId, ref: 'gExpense'}],
-
-})
-
-const member = new Schema({
-    group_id: {type: Schema.Types.ObjectId, ref: 'Group', required: true},
-    member_id: { type: Schema.Types.ObjectId, ref: 'User' },
-    status: { type: String, required: true },
-})
-
-const User = mongoose.model("User", userInfo)
-const Group = mongoose.model("Group", groupInfo)
-const Member = mongoose.model("Member", member)
-const gExpense = mongoose.model("gExpense", g_Expense)
-const iExpense = mongoose.model("iExpense", i_Expense)
 
 
 // const db = mysql.createPool({
@@ -233,73 +187,81 @@ app.post('/register', async function(req,res) {
 });
 
 app.post('/profile/initialPull', function(req,res){
-    const id = get_id(req.body.token)
-    if (!id){
-        res.writeHead(203,{
-            'Content-Type' : 'text/plain'
-        })
-        res.end("Token has expired")
-        return
+    const payload = { body: req.body};
+    kafka.make_request(GET_PROFILE, payload, (error, results) => {
+    if (!results.success) {
+      res.status(400).send(results.data);
+    } else {
+      res.status(200).send(results.data);
     }
-    console.log(get_id(req.body.token)," is ID")
-    if (false) {
-        const sqlQuery = `SELECT * from userInfo WHERE id=${id}`
-        console.log(sqlQuery)
-        db.query(sqlQuery, (err, result, fields) => {
-            if (!err){
-                console.log(result)
-                res.writeHead(200,{
-                    'Content-Type' : 'text/plain'
-                })
-                let pic_path;
-                if (result[0].image!=null) {
-                    pic_path = "/images/profilepics/"+ id + "/"+result[0].image
-                }
-                else{
-                    pic_path=null
-                }
-                const endData = {auth:true, 
-                    name: result[0].fname + " " + result[0].lname,
-                    email: result[0].email,
-                    phone: result[0].phone,
-                    pic : pic_path, 
-                    currency: result[0].currency,
-                    timezone: result[0].timezone,
-                    language: result[0].language}
-                res.end(JSON.stringify(endData));    
-            }
-            else {
-                console.log(err)
-                res.writeHead(204,{
-                    'Content-Type' : 'text/plain'
-                })
-                res.end("Issue with data base")
-            }
-        })
-    }
-    else {
-        User.findOne({_id:id}, (err, user) => {
-            if (!err) {
-                const endData = {auth:true, 
-                    name: user.fname + " " + user.lname,
-                    email: user.email,
-                    phone: 'phone' in user ? user.phone : null,
-                    pic : 'pic' in user ? user.pic : null, 
-                    currency: 'currency' in user ? user.currency : USD, 
-                    timezone: 'timezone' in user ? user.timezone : null, 
-                    language: 'language' in user ? user.language : null, }
-                //endData.serialize()
-                res.end(JSON.stringify(endData));
-            }
-            else {
-                console.log(err)
-                res.writeHead(204,{
-                    'Content-Type' : 'text/plain'
-                })
-                res.end(JSON.stringify({message: "Invalid Credentials"}))
-            }
-        })
-    }
+  });
+    // const id = get_id(req.body.token)
+    // if (!id){
+    //     res.writeHead(203,{
+    //         'Content-Type' : 'text/plain'
+    //     })
+    //     res.end("Token has expired")
+    //     return
+    // }
+    // console.log(get_id(req.body.token)," is ID")
+    // if (false) {
+    //     const sqlQuery = `SELECT * from userInfo WHERE id=${id}`
+    //     console.log(sqlQuery)
+    //     db.query(sqlQuery, (err, result, fields) => {
+    //         if (!err){
+    //             console.log(result)
+    //             res.writeHead(200,{
+    //                 'Content-Type' : 'text/plain'
+    //             })
+    //             let pic_path;
+    //             if (result[0].image!=null) {
+    //                 pic_path = "/images/profilepics/"+ id + "/"+result[0].image
+    //             }
+    //             else{
+    //                 pic_path=null
+    //             }
+    //             const endData = {auth:true, 
+    //                 name: result[0].fname + " " + result[0].lname,
+    //                 email: result[0].email,
+    //                 phone: result[0].phone,
+    //                 pic : pic_path, 
+    //                 currency: result[0].currency,
+    //                 timezone: result[0].timezone,
+    //                 language: result[0].language}
+    //             res.end(JSON.stringify(endData));    
+    //         }
+    //         else {
+    //             console.log(err)
+    //             res.writeHead(204,{
+    //                 'Content-Type' : 'text/plain'
+    //             })
+    //             res.end("Issue with data base")
+    //         }
+    //     })
+    // }
+    // else {
+    //     User.findOne({_id:id}, (err, user) => {
+    //         if (!err) {
+    //             const endData = {auth:true, 
+    //                 name: user.fname + " " + user.lname,
+    //                 email: user.email,
+    //                 phone: 'phone' in user ? user.phone : null,
+    //                 pic : 'pic' in user ? user.pic : null, 
+    //                 currency: 'currency' in user ? user.currency : USD, 
+    //                 timezone: 'timezone' in user ? user.timezone : null, 
+    //                 language: 'language' in user ? user.language : null, }
+    //             //endData.serialize()
+    //             res.end(JSON.stringify(endData));
+    //         }
+    //         else {
+    //             console.log(err)
+    //             res.writeHead(204,{
+    //                 'Content-Type' : 'text/plain'
+    //             })
+    //             res.end(JSON.stringify({message: "Invalid Credentials"}))
+    //         }
+    //     })
+    // }
     
 })
 
@@ -505,7 +467,6 @@ app.post('/groupCreate', async function(req,res){
     
     
 })
-
 
 app.post('/login', function(req,res) {
     if (false){
