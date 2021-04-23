@@ -36,7 +36,7 @@ const DashItems = ({body, group}) => {
         }
     }
     return (
-        <MDBContainer style={{width:"80%", height:"100%"}}>
+        <MDBContainer style={{width:"80%"}}>
             <MDBCard style={{ background:'lightgrey'}}>
                 <MDBCardBody>
                     <MDBCardTitle style={{textalign:"left"}}>{body.expense_name} ({group})</MDBCardTitle>

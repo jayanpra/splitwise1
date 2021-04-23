@@ -81,6 +81,7 @@ const handle_request = async (req, callback) => {
             if ( err && err.code !== 11000 ) {
                 console.log(err)
                 callback(null, {
+                    status: 204,
                     message: "Database Issue",
                     success: false,
                 })
@@ -88,12 +89,14 @@ const handle_request = async (req, callback) => {
             }
             if ( err && err.code === 11000 ) {
                 callback(null, {
+                    status: 204,
                     message: 'duplicate element',
                     success: false
                 })
                 return
             }
             callback(null, {
+                status: 200,
                 message: 'successful submission',
                 success: true
             })

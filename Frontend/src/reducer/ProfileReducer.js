@@ -1,7 +1,5 @@
 import { createSlice} from '@reduxjs/toolkit';
-import {get_data, send_update} from '../actions/profileActions'
-
-
+import {get_data, send_update, clearError} from '../actions/profileActions'
 
 export const ProfileReducer = createSlice({
     name: "profile",
@@ -14,68 +12,12 @@ export const ProfileReducer = createSlice({
         currecncy: "",
         timezone: "", 
         language: "",
+        success: false,
         error: false,
         feed: '',
     },
-    reducers: {
-      setRData(state,action) {
-        state.pname = action.payload.pname
-        state.email = action.payload.email
-        if (action.payload.phone !== null) {
-          state.phone = `(${action.payload.phone.substring(0,3)}) ${action.payload.phone.substring(3,6)} ${action.payload.phone.substring(6,10)}`
-        }
-        else {
-          state.phone = action.payload.phone
-        }
-        state.pic_loc = action.payload.pic_loc
-        state.currency =  action.payload.currency
-        state.timezone = action.payload.timezone 
-        state.language = action.payload.language
-    },
-        setSingleData(state,action){
-            let key = action.payload.key
-            let value = action.payload.value
-            switch (key) {
-                case 'name':{
-                  state.pname = value
-                  break;
-                }
-                case 'email':{
-                  state.email = value
-                  break;
-                }
-                case 'phone':{
-                  state.phone = `(${value.substring(0,3)}) ${value.substring(3,6)} ${value.substring(6,10)}`
-                  break;
-                }
-                case 'currency':{
-                  localStorage.setItem("currency", value)
-                  state.currency = value
-                  break;
-                }
-                case 'timezone':{
-                  state.timezone = value
-                  break;
-                }
-                case 'language':{
-                  state.language = value
-                  break;
-                }
-                case 'image':{
-                  state.pic_info = value
-                  break;
-                }
-                default:
-                  break;
-              }
-        },
-        removeError(state) {
-          state.error = false
-        }
-    },
     extraReducers: {
       [get_data.fulfilled] : (state,action) => {
-        
         if (action.payload === null){
           return
         }
@@ -98,6 +40,8 @@ export const ProfileReducer = createSlice({
         if (action.payload.status) {
               let key = action.payload.key
               let value = action.payload.value
+              state.success = true
+              state.feed = `${key} changed successfully`
               switch (key) {
                   case 'name':{
                     state.pname = value
@@ -137,14 +81,18 @@ export const ProfileReducer = createSlice({
           state.feed = action.payload.message
         }
       },
-      [send_update.rejected] : (state, action) => {
+    [send_update.rejected] : (state, action) => {
         state.error = true
         state.feed = "Operation Unsuccessful"
     },
-    },
+    [clearError.fulfilled] : (state, action) => {
+      state.error = false
+      state.feed = ""
+      state.success = false
+  },
+  },
     
 });
 
 
-export const {setRData, setSingleData, removeError} = ProfileReducer.actions;
 export default ProfileReducer.reducer

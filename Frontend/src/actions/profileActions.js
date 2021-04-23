@@ -17,7 +17,6 @@ export const get_data = createAsyncThunk(
 export const send_update = createAsyncThunk(
   'users/sendupdate',
   async (pckg) => {
-    console.log("---LET ME CHECK---", pckg);
     const response = await axios.post('http://localhost:3001/profile/update', pckg)
     console.log(response.status)
     if (response.status === 200){
@@ -28,5 +27,12 @@ export const send_update = createAsyncThunk(
       return {status: false, message: `${pckg.data.type} cannot be changed to ${pckg.data.value}`}
     }
     
+  }
+)
+
+export const clearError = createAsyncThunk(
+  'users/profileClearError',
+  async () => {
+    return {arg: true}
   }
 )

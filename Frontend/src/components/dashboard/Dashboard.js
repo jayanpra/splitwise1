@@ -97,7 +97,7 @@ const Dashboard = () => {
                 <MDBRow>
                     <MDBCol>
                         <MDBRow>
-                        <MDBContainer style={{width:"100%", height:"2%", marginTop: "2%"}}>
+                        <MDBContainer style={{width:"100%", height:"2%", marginTop: "2%", overflow: "auto"}}>
                             <MDBCard style={{backgroundColor:"LimeGreen"}}>
                             <MDBCardBody>
                                 <MDBCardTitle style={{textalign:"left"}}>Your Asset List</MDBCardTitle>
@@ -105,9 +105,10 @@ const Dashboard = () => {
                                 </MDBCard>
                         </MDBContainer>
                         </MDBRow>
+                        <div style={{overflow: 'auto', maxHeight:"600px"}}>
                         {redux_data.lend_list.map((lend)=> 
                             <MDBRow><DashEntry body= {lend}/></MDBRow>
-                        )}
+                        )}</div>
                     </MDBCol>
                     <MDBCol>
                         <MDBRow>
@@ -119,9 +120,10 @@ const Dashboard = () => {
                                 </MDBCard>
                         </MDBContainer>
                         </MDBRow>
+                        <div style={{overflow: 'auto', maxHeight:"600px"}}>
                         {redux_data.borrow_list.map((borrow)=> 
                             <MDBRow><DashEntry body= {borrow}/></MDBRow>
-                        )}
+                        )}</div>
                     </MDBCol>
                 </MDBRow>
                 </Col>

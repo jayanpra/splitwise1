@@ -2,11 +2,13 @@ const User = require('../../models/userModel')
 const gExpense = require('../../models/gExpenseModel')
 const iExpense = require("../../models/iExpenseModel")
 const Group = require("../../models/groupModel")
+const get_id = require('../../models/verifyToken');
 
 const handle_request = async (req, callback) => {
     const id = get_id(req.body.token)
     if (!id){
         callback(null, {
+            status: 204,
             message: "Token has expired",
             success: false,
         })
@@ -22,7 +24,6 @@ const handle_request = async (req, callback) => {
         }).populate('lender_id').populate('borrow_id')
         console.log(expense_list)
         for (let i in expense_list){
-            //console.log(expense_list[i].lender_id._id, expense_list[i].borrow_id._id, expense_list[i].lender_id._id.toString() == expense_list[i].borrow_id._id)
             if (expense_list[i].lender_id._id.toString() == expense_list[i].borrow_id._id.toString()){
 
             }
@@ -54,12 +55,12 @@ const handle_request = async (req, callback) => {
         console.log(ledger)
         console.log(object)
         const final_data = {accounts: ledger, balance: object}
-        res.writeHead(200,{
-            'Content-Type' : 'text/plain'
+        callback(null, {
+            status: 200,
+            data: final_data,
+            success: true,
         })
-        res.end(JSON.stringify(final_data))
     }
-
 }
 
 exports.handle_request = handle_request;

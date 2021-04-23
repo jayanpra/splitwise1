@@ -1,7 +1,8 @@
 import React from 'react'
 import { MDBCard, MDBCardBody, MDBCardTitle,  MDBContainer, MDBBtn} from 'mdbreact';
 import DashItems from '../common/DashItems';
-import ToggleBox from '../common/ToggleBox'
+import ToggleBox from '../common/ToggleBox';
+import OverflowScrolling from 'react-overflow-scrolling';
 
 const GroupBody = ({name, expense_list,onChange, exitGroup}) => {
     console.log(expense_list)
@@ -15,10 +16,12 @@ const GroupBody = ({name, expense_list,onChange, exitGroup}) => {
                     </MDBCardBody>
                     </MDBCard>
             </MDBContainer>
+            <div style={{overflow: 'auto', maxHeight:"780px"}}>
             {expense_list.map((expense)=> (
-                <div><DashItems group={name} body={expense}/></div>
+                <div ><DashItems group={name} body={expense}/></div>
             ))
             }
+            </div>
         </div>
     )
 }

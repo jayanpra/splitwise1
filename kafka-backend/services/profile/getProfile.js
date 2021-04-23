@@ -6,7 +6,8 @@ const handle_request = async (req, callback) => {
     const id = get_id(req.body.token)
     if (!id){
         callback(null, {
-            msg: "Token has expired",
+            status: 203,
+            message: "Token has expired",
             success: false,
         })
         return
@@ -61,13 +62,15 @@ const handle_request = async (req, callback) => {
                     language: 'language' in user ? user.language : null, 
                 }
                 callback(null, {
+                    status: 200,
                     data: endData,
-                    success: true
+                    success: true,
                 })
             }
             else {
                 callback(null, {
-                    msg: "Database Issue",
+                    status: 204,
+                    message: "Database Issue",
                     success: false,
                 })
             }

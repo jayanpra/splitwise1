@@ -3,8 +3,12 @@ import { } from "mdbreact";
 import { ProSidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 import 'react-pro-sidebar/dist/css/styles.css';
 import { Link } from 'react-router-dom';
+import { useDispatch } from "react-redux";
+import { clear} from '../../actions/logisterActions';
 const GroupSide = ({groupname, LogOut, launchExpense, changeGroup}) => {
+    const dispatch = useDispatch()
     const Logout = () => {
+      dispatch(clear())
       localStorage.removeItem("token")
       localStorage.removeItem("currency")
       localStorage.removeItem("fname")

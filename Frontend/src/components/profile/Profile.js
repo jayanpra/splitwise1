@@ -10,8 +10,7 @@ import AddExpense from '../common/AddExpense';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from "react-redux";
-import { setSingleData, removeError } from '../../reducer/ProfileReducer'
-import {get_data, send_update} from '../../actions/profileActions'
+import {get_data, send_update, clearError} from '../../actions/profileActions'
 
 const Profile = () => {
   const currency = ['USD', 'KWD', 'BHD', 'GBP', 'EUR', 'CAD'];
@@ -41,60 +40,35 @@ const Profile = () => {
     'UTC + 11:00',
     'UTC + 12:00'];
   const language = ['English', 'French', 'German'];
-  const [data, setData] = useState({
-    name: null,
-    email: null,
-    phone: null,
-    currency: null,
-    timezone: null,
-    language: null,
-    image: null,
-  });
   const dispatch = useDispatch();
   const redux_data = useSelector(state => state.profile);
   const [expTog, setToggle] = useState(false)
   const [delayed, noSession] = useState(false)
-  const notify = (message) => toast(`${message} changed sucessfully!`);
-  
+  const notify = (message) => toast(message);
+  const error = redux_data.error
+  const feed = redux_data.feed
+  const success = redux_data.success
   const LogOut = () => {
     noSession(true)
   }
 
   useEffect(() => {
+    if (error){
+      notify(feed)
+      dispatch(clearError())
+    }
+  }, [dispatch,error, feed])
+
+  useEffect(() => {
+    if (success){
+      notify(feed)
+      dispatch(clearError())
+    }
+  }, [dispatch,success, feed])
+
+  useEffect(() => {
     dispatch(get_data(localStorage.getItem('token')))
-  },[]);
-
-  // useEffect(() => {
-  //   if (data.name === null) {
-  //     const token = localStorage.getItem('token');
-  //     if (token) {
-  //       const serverData = { 'token': token };
-  //       axios.defaults.withCredentials = true;
-  //       axios.post('http://localhost:3001/profile/initialPull', serverData)
-  //         .then((response) => {
-  //           if (response.status === 200) {
-  //             localStorage.setItem("currency", response.data.currency)
-  //             localStorage.setItem("fname", response.data.name.split( )[0])
-  //             console.log(response.data)
-  //             dispatch( setRData({pname: response.data.name, 
-  //                               email: response.data.email, 
-  //                               phone: response.data.phone,
-  //                               pic_loc: "http://localhost:3001/"+response.data.pic,
-  //                               currency: response.data.currency,
-  //                               timezone: response.data.timezone,
-  //                               language: response.data.language}))
-  //           }
-  //         })
-  //         .then((response) => {
-  //           return <Redirect to='/landing'/>
-  //         }); 
-  //     }
-  //     else {
-  //       noSession(true)
-  //     }
-  //   }
-  // },[data]);
-
+  },[dispatch]);
   
   const onImageChange = (event) => {
     const formData = new FormData();
@@ -114,7 +88,6 @@ const Profile = () => {
           console.log("Records Saved")
           const regex = /\/[\w]+\.\w+/
           const new_path = redux_data.pic_loc.replace(regex, event.target.files[0].name)
-          dispatch(setSingleData({key:"image", value: new_path}))
           window.location.reload(false)
         }
       })
@@ -122,6 +95,7 @@ const Profile = () => {
           console.log("DataBase Issue")
       }); 
   }
+
   const onProfileChange = async (value) => {
     if (value.type === 'email') {
       const email_val = /\S+@\S+\.\S+/
@@ -139,26 +113,6 @@ const Profile = () => {
     }
     const pckg = {token:localStorage.getItem('token'), data: value}
     await dispatch(send_update(pckg));
-    console.log(redux_data.error)
-    if (redux_data.error) {
-      notify(redux_data.feed)
-      removeError()
-    }
-    else {
-      notify(value.type)
-    }
-    // axios.defaults.withCredentials = true;
-    // axios.post('http://localhost:3001/profile/update', pckg)
-    //   .then((response) => {
-    //     if (response.status === 200) {
-    //       console.log("Records Saved")
-    //       dispatch(setSingleData({key:value.type, value: value.value}))
-    //       notify(value.type)
-    //     }
-    //   })
-    //   .then((response) => {
-    //       console.log("DataBase Issue")
-    //   }); 
   }
   const showAddExpense = () => {
     setToggle(!expTog)

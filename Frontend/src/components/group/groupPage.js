@@ -195,7 +195,7 @@ const GroupPage = () => {
           }); 
     }
     return (
-        <div>
+        <div style={{overflow: 'auto'}}>
             <ToastContainer />
             {delayed ? <div>{notify("Logging out")}<Redirect to='/landing'/></div>: null}
             <AddExpense open={expTog} onToggle={showAddExpense}/>

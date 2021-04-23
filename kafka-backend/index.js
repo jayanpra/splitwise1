@@ -24,9 +24,24 @@ app.use( bodyParser.urlencoded( { extended: false } ) );
 app.use(express.static(path.resolve('./public')));
 dotenv.config()
 
-const {GET_PROFILE} = require('./kafka/topics');
+const {GET_PROFILE, SAVE_PROFILE, GET_DASH, SETTLE_UP, ADD_COMMENT, ADD_EXPENSE, GET_COMMENT, GROUP_APPROVE, GROUP_CHANGE, GROUP_CREATE, GROUP_EXIT, GROUP_FILL, GROUP_SUGGEST, LOGIN, REGISTER} = require('./kafka/topics');
+
 
 const getProfile = require('./services/profile/getProfile');
+const saveProfile = require('./services/profile/saveProfile');
+const getDash = require('./services/dash/getDash');
+const addExpense = require('./services/dash/addExpense')
+const settleUp = require('./services/dash/settleUp')
+const addComment = require('./services/comment/addComment')
+const getComment = require('./services/comment/getComment')
+const groupApprove = require('./services/group/groupApprove')
+const groupChange = require('./services/group/groupChange')
+const groupCreate = require('./services/group/groupCreate')
+const groupExit = require('./services/group/groupExit')
+const groupFill = require('./services/group/groupFill')
+const groupSuggest = require('./services/group/groupSuggest')
+const login = require('./services/Logister/Login')
+const register = require('./services/Logister/Register')
 
 // const db = mysql.createPool({
 //     host: "database-2.copvz5nsdbwv.us-west-2.rds.amazonaws.com",
@@ -76,4 +91,19 @@ function handleTopicRequest(topic_name, fname) {
     });
 }
 
-handleTopicRequest(GET_PROFILE, getProfile)
+handleTopicRequest(GET_PROFILE, getProfile);
+handleTopicRequest(SAVE_PROFILE, saveProfile);
+handleTopicRequest(GET_DASH, getDash);
+handleTopicRequest(SETTLE_UP, settleUp);
+handleTopicRequest(ADD_EXPENSE, addExpense);
+handleTopicRequest(GET_COMMENT, getComment);
+handleTopicRequest(ADD_COMMENT, addComment);
+handleTopicRequest(LOGIN,login);
+handleTopicRequest(REGISTER, register);
+handleTopicRequest(GROUP_APPROVE, groupApprove);
+handleTopicRequest(GROUP_CHANGE, groupChange);
+handleTopicRequest(GROUP_CREATE, groupCreate);
+handleTopicRequest(GROUP_EXIT,groupExit);
+handleTopicRequest(GROUP_FILL, groupFill);
+handleTopicRequest(GROUP_SUGGEST, groupSuggest);
+
