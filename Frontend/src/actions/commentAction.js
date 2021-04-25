@@ -22,7 +22,7 @@ export const save_comment = createAsyncThunk(
     async (pckg) => {
       const response = await axios.post('http://localhost:3001/addcomment', pckg)
       if (response.status === 200){
-        return { auth: true, comment: {author: localStorage.getItem('name'), text: pckg.comment}, post_id: pckg.expense_id}
+        return { auth: true, comment: {author: localStorage.getItem('fname'), text: pckg.text}, post_id: pckg.expense_id}
       }
       else
       {

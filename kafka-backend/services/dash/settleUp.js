@@ -64,8 +64,8 @@ const handle_request = async (req, callback) => {
             }
             else {
                 settle_entry.push({
-                    lender_id: keys[i],
-                    borrow_id: id,
+                    lender_id: id,
+                    borrow_id: keys[i],
                     expense_name: 'Settle Up Amount',
                     expense: settle_data[keys[i]] * -1,
                     date: date_string,

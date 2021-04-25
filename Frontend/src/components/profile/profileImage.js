@@ -28,7 +28,13 @@ const ProfileImage = ({pic, onImageChange, group_id}) => {
         var http = new XMLHttpRequest();
         
         http.open('HEAD', url, false);
-        http.send();
+        try{
+            http.send();
+        }
+        catch(err){
+            return true;
+        }
+        
         
         return http.status !== 404;
     }

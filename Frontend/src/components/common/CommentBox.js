@@ -19,6 +19,7 @@ const CommentBox = ({comments, addComments}) => {
         const comment = document.getElementById('input').value
         console.log(comment)
         addComments(comment)
+        document.getElementById('input').value = '';
     }
     return (
         <MDBContainer style={{ background:'FloralWhite', marginTop:"0.25%"}}>
@@ -29,10 +30,10 @@ const CommentBox = ({comments, addComments}) => {
             contentClassName="content"
             horizontal={false}
             ><div>
-            {comments.map((comment) =>
+            {typeof comments === 'object' ? (<div>{comments.map((comment) =>
             <MDBRow style={{ background: get_color(comments.indexOf(comment)), textAlign: "left", }}><p style={{marginLeft: "3%", width: "95%"}}><b>{comment.author}: </b>{comment.text}</p><br/>
             </MDBRow>
-            )}
+            )}</div>) : null }
             </div>
             </ScrollArea>
             <MDBRow style={{marginTop: '0.15%'}}>

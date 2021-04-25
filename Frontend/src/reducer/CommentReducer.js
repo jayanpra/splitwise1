@@ -24,7 +24,7 @@ export const CommentReducer = createSlice({
         [save_comment.fulfilled] : (state, action) => {
             if (action.payload.auth) {
                 state.add_comment = true
-                state.comment_list[action.payload.post_id].push(action.payload.comment)
+                //state.comment_list[action.payload.post_id].push(action.payload.comment)
             }
             else{
                 state.error = action.payload.message
