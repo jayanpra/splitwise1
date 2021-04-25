@@ -62,7 +62,7 @@ const handle_request = async (req, callback) => {
                     expenses.push({ expense_id: group.expense[i]._id,
                                     expense_name: group.expense[i].exp_name, 
                                     date:group.expense[i].date, 
-                                    shares:group.expense[i].share, 
+                                    shares:group.expense[i].shares, 
                                     payee: group.expense[i].payee.fname, 
                                     amount: group.expense[i].amount, color:'green'})
                 }
@@ -70,7 +70,7 @@ const handle_request = async (req, callback) => {
                     expenses.push({ expense_id: group.expense[i]._id,
                         expense_name: group.expense[i].exp_name, 
                         date:group.expense[i].date, 
-                        shares:group.expense[i].share, 
+                        shares:group.expense[i].shares, 
                         payee: group.expense[i].payee.fname, 
                         amount: group.expense[i].amount, color:'red'})
                 }

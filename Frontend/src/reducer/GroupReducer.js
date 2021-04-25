@@ -31,6 +31,7 @@ export const GroupReducer = createSlice({
                 state.groups = []
                 state.group_name = []
                 state.selected_group = []
+                state.group_req = []
                 state.currency = null
                 state.pic = null
                 state.exit_flag = false
@@ -43,7 +44,9 @@ export const GroupReducer = createSlice({
                         }
                     }
                 state.name = group_data[0]
-                state.group_id = action.payload.data.group[0].id
+                if ( action.payload.data.group.length > 0){
+                    state.group_id = action.payload.data.group[0].id
+                }
                 state.groups = action.payload.data.group
                 state.group_name = group_data
                 state.selected_group = action.payload.data.expense
