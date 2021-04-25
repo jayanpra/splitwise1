@@ -6,6 +6,7 @@ const ProfileImage = ({pic, onImageChange, group_id}) => {
     const [image,changeImage] = useState(null)
     const [commitFlag, changeCommit] = useState(false)
     const [newImage, changeNew] = useState(false)
+
     const ImageTake = (event) => {
         const formData = new FormData();
         console.log(event.target.files[0]);
@@ -23,6 +24,15 @@ const ProfileImage = ({pic, onImageChange, group_id}) => {
         changeCommit(true)
     }
 
+    const imageExist = (url) => {
+        var http = new XMLHttpRequest();
+        
+        http.open('HEAD', url, false);
+        http.send();
+        
+        return http.status !== 404;
+    }
+
     const ImageSave = () => {
         console.log(image)
         changeCommit(false)
@@ -31,8 +41,8 @@ const ProfileImage = ({pic, onImageChange, group_id}) => {
     return (
         <div>
             <Card style={{ width: '18rem' }}>
-                {newImage ? <Card.Img variant="top" src={image.image} style={{borderRadius: "50%"}}/> : 
-                <div>{pic ? <Card.Img variant="top" src={pic} style={{borderRadius: "50%"}}/> : <Card.Img variant="top" style={{borderRadius: "50%"}} src={logo}/>}</div>}
+                { image && imageExist(image.image) ? <Card.Img variant="top" src={image.image} style={{borderRadius: "50%"}}/> : 
+                <div>{pic && imageExist(pic) ? <Card.Img variant="top" src={pic} style={{borderRadius: "50%"}}/> : <Card.Img variant="top" style={{borderRadius: "50%"}} src={logo}/>}</div>}
                 
                 <Card.Body>
                     <Card.Title>Hi </Card.Title>

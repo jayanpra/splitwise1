@@ -103,7 +103,7 @@ app.use(function(req, res, next){
 */
 app.post('/register', async function(req,res) {
     const payload = { body: req.body};
-    kafka.make_request(GET_PROFILE, payload, (error, results) => {
+    kafka.make_request(REGISTER, payload, (error, results) => {
     if (!results.success) {
       res.status(results.status).send(results.message);
     } else {

@@ -34,7 +34,7 @@ const handle_request = async (req, callback) => {
                 else{
                     callback(null, {
                         status: 200,
-                        message: "Token has expired",
+                        message: "success",
                         success: true,
                     })
                 }

@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {get_group, change_group, approve_group, exit_group}  from '../actions/groupAction'
+import {get_group, change_group, approve_group, exit_group, clearError}  from '../actions/groupAction'
 
 export const GroupReducer = createSlice({
     name: "group",
@@ -90,7 +90,12 @@ export const GroupReducer = createSlice({
                 state.error = true
                 state.feed = action.payload.message
             } 
-        }
+        },
+        [clearError.fulfilled] : (state, action) => {
+            state.error = false
+            state.feed = ""
+            state.success = false
+        },
     }   
 });
 

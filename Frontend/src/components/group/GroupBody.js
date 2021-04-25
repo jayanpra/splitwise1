@@ -1,9 +1,9 @@
-import {useState} from 'react'
 import { MDBCard, MDBCardBody, MDBCardTitle,  MDBContainer, MDBBtn} from 'mdbreact';
 import DashItems from '../common/DashItems';
 import ToggleBox from '../common/ToggleBox';
 
 const GroupBody = ({name, expense_list,onChange, exitGroup}) => {
+    console.log("okay",typeof expense_list)
     return (
         <div>
             <MDBContainer style={{width:"80%", height:"100%"}}>

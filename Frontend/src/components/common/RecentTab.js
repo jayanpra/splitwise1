@@ -7,7 +7,7 @@ const RecentTab = ({body}) => {
         return `${months[parseInt(temp[1])-1]} ${temp[2]}, ${temp[0]}`
     }
     return (
-        <MDBContainer style={{width:"1000px", height:"50px"}}>
+        <MDBContainer style={{ height:"50px"}}>
             <MDBCard>
                 <MDBCardBody>
                     <MDBCardTitle style={{textalign:"left"}}>{body.uname} Added "{body.ename}" in "{body.gname}" for {body.share} persons</MDBCardTitle>

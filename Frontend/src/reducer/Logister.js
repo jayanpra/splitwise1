@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {login, register, clear}  from '../actions/logisterActions'
+import {login, register, clear, addDetails}  from '../actions/logisterActions'
 
 export const LogisterReducer = createSlice({
     name: "logister",
@@ -40,9 +40,13 @@ export const LogisterReducer = createSlice({
                 state.pass = false
             }
         },
+        [addDetails.fulfilled] : (state, action) => {
+            state.email = action.payload.email
+            state.fname = action.payload.fname
+            state.lname = action.payload.lname
+            state.password = action.payload.password
+        },
       },
   });
   
-  
-  export const {addDetails, clearError} = LogisterReducer.actions;
   export default LogisterReducer.reducer

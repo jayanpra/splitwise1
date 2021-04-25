@@ -28,7 +28,7 @@ export const register = createAsyncThunk(
         localStorage.setItem('token', response.data.token)
         localStorage.setItem('currency', response.data.currency)
         localStorage.setItem('fname', response.data.name)
-        return response.data
+        return {auth: true, message: "Succesfully Registered"}
     }
     else {
         return {auth: false, message: response.data, status: response.status}
@@ -40,5 +40,11 @@ export const clear = createAsyncThunk(
     'users/clear',
     async () => {
       return {arg: true}
+    }
+  )
+  export const addDetails = createAsyncThunk(
+    'user/addDetails',
+    async (data) => {
+      return data
     }
   )

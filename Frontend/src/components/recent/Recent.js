@@ -48,17 +48,6 @@ const Recent = () => {
                 const serverData = { 'token': token };
                 dispatch(get_data(serverData))
                 pullExit(false)
-                // axios.defaults.withCredentials = true;
-                // axios.post('http://localhost:3001/pullRecent', serverData)
-                // .then((response) => {
-                //     if (response.status === 200) {
-                //         pullExit(false)
-                //         changeList([...response.data.expense])
-                //     }
-                // })
-                // .then((response) => {
-                //     console.log("err: ", response)
-                // }); 
             }
             else {
                 noSession(true)

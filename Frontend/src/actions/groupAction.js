@@ -57,3 +57,10 @@ export const exit_group = createAsyncThunk(
     }
   }
 )
+
+export const clearError = createAsyncThunk(
+  'users/profileClearError',
+  async () => {
+    return {arg: true}
+  }
+)

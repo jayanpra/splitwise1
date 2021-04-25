@@ -3,7 +3,6 @@ import { MDBCard, MDBCardBody, MDBCardTitle, MDBCardText, MDBRow,MDBCol, MDBCont
 import {FaComment} from "react-icons/fa";
 import CommentBox from './CommentBox';
 import { useSelector, useDispatch } from "react-redux";
-import { clear_reducer} from '../../reducer/CommentReducer'
 import {get_comment, save_comment} from '../../actions/commentAction'
 
 const DashItems = ({body, group}) => {
@@ -19,21 +18,12 @@ const DashItems = ({body, group}) => {
     const toggle = async () => {
         console.log(expTog)
         if (expTog === false){
-            //dispatch(clear_reducer())
-            await dispatch(get_comment({token:localStorage.getItem('token'),expense_id: body.expense_id}))
-            console.log(comment_data)
-            setComment(comment_data.comment_list)
-            //dispatch(clear_reducer())
+            dispatch(get_comment({token:localStorage.getItem('token'),expense_id: body.expense_id}))
         }
-        
         setToggle(!expTog)
     }
     const add_comment = async (comment) => {
-        //dispatch(clear_reducer())
-        await dispatch(save_comment({token: localStorage.getItem('token'), expense_id: body.expense_id, text:comment }))
-        if (comment_data.addComments){
-            setComment([...comment_list, {text: comment, author: "you wrote"}])
-        }
+        dispatch(save_comment({token: localStorage.getItem('token'), expense_id: body.expense_id, text:comment }))
     }
     return (
         <MDBContainer style={{width:"80%"}}>

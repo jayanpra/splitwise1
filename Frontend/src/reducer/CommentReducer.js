@@ -1,35 +1,41 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {get_comment, save_comment}  from '../actions/commentAction'
+import {get_comment, save_comment, clearError}  from '../actions/commentAction'
 
 export const CommentReducer = createSlice({
     name: "comment",
     initialState:{
         comment_list: {},
-        add_comment: false
+        add_comment: false,
+        error: null
 
-    },
-    reducer:{
-        clear_reducer(state, action) {
-            console.log("here")
-            state.comment_list = []
-            state.add_comment = false
-        }
     },
     extraReducers: {
         [get_comment.fulfilled] : (state,action) => {
-            state.comment_list[action.payload.id] = []
-            for (let i  in action.payload.response.comment_list){
-                state.comment_list[action.payload.id].push(action.payload.response.comment_list[i])
+            if (action.payload.auth){
+                state.comment_list[action.payload.id] = []
+                for (let i  in action.payload.response.comment_list){
+                    state.comment_list[action.payload.id].push(action.payload.response.comment_list[i])
+                }
+            }
+            else {
+                state.error = action.payload.message
             }
         },
         [save_comment.fulfilled] : (state, action) => {
-            if (action.payload.status === 200) {
+            if (action.payload.auth) {
                 state.add_comment = true
+                state.comment_list[action.payload.post_id].push(action.payload.comment)
             }
+            else{
+                state.error = action.payload.message
+            }
+        },
+        [clearError.fulfilled] : (state, action) => {
+            state.error = null
+            state.add_comment = false
         },
       },
   });
   
-  
-  export const {clear_reducer} = CommentReducer.actions;
+
   export default CommentReducer.reducer

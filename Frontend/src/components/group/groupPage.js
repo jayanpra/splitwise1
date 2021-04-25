@@ -12,31 +12,36 @@ import ProfileImage from '../profile/profileImage'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from "react-redux";
-import {get_group, change_group, approve_group, exit_group} from '../../actions/groupAction'
+import {get_group, change_group, approve_group, exit_group, clearError} from '../../actions/groupAction'
 
 
 const GroupPage = () => {
     const dispatch = useDispatch()
     const redux_data = useSelector(state => state.group)
-    const [data, setData] = useState({
-        name: null,
-        groups: [],
-        group_name:[],
-        selected_group: [],
-        currency: null,
-        pic: null,
-      });
-
     const [expTog, setToggle] = useState(false)
-    const [group_req, getReq] = useState([])
-    const [group_id,changeID] = useState(null)
     const [show_req, toggleShow] = useState(false)
     const [delayed, noSession] = useState(false)
     const notify = (message) => toast(message);
+    const error = redux_data.error
+    const feed = redux_data.feed
+    const success = redux_data.success
 
     const LogOut = () => {
         noSession(true)
     }
+    
+    useEffect(() => {
+        if (error){
+          notify(feed)
+          dispatch(clearError())
+        }
+      }, [dispatch,error, feed])
+    
+      useEffect(() => {
+        if (success){
+          dispatch(clearError())
+        }
+      }, [dispatch,success, feed])
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -100,25 +105,22 @@ const GroupPage = () => {
             notify("no group selected")
             return
         }
-        let gid, id;
-        for(let i in redux_data.groups){
-            if (redux_data.groups[i].name === redux_data.name){
-                gid = redux_data.groups[i].id
-                id=i
-            }
-        }
-        const formData = new FormData();
-        console.log(event.target.files[0]);
-        formData.append('profileImage',event.target.files[0],event.target.files[0].name + ',' + gid);
+        // let gid, id;
+        // for(let i in redux_data.groups){
+        //     if (redux_data.groups[i].name === redux_data.name){
+        //         gid = redux_data.groups[i].id
+        //         id=i
+        //     }
+        // }
+        // const formData = new FormData();
+        // console.log(event.target.files[0]);
+        // formData.append('profileImage',event.target.files[0],event.target.files[0].name + ',' + gid);
         const config = {
           headers: { 
             'content-type': 'multipart/form-data'
           }
         }
-        for (var value of formData.values()) {
-            console.log(value);
-        }
-        axios.post('http://localhost:3001/imagegroupupdate',formData,config )
+        axios.post('http://localhost:3001/imagegroupupdate',event,config )
           .then((response) => {
             if (response.status === 200) {
               console.log("Records Saved")

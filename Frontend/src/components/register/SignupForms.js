@@ -2,7 +2,7 @@ import {Form,Container, Row, Col, Button} from 'react-bootstrap'
 import { MDBInput,MDBTypography } from "mdbreact";
 import {useState} from 'react'
 import { useSelector, useDispatch } from "react-redux";
-import {addDetails} from '../../reducer/RegisterReducer'
+import {addDetails} from '../../actions/logisterActions'
 
 
 const SignupForms = ({onClick}) => {
@@ -11,7 +11,7 @@ const SignupForms = ({onClick}) => {
     let [invalid_pass,setClickpassword] = useState(false)
     let [invalid_cpass,setClickcpassword] = useState(false)
     const dispatch = useDispatch();
-    const redux_data = useSelector(state => state.register);
+    const redux_data = useSelector(state => state.logister);
     const validate = (fname, lname, email, password, confirm_pass) => {
         backtrack()
         dispatch(addDetails({fname: fname, lname: lname, email: email, password: password}))
@@ -60,7 +60,7 @@ const SignupForms = ({onClick}) => {
                 </Row>
                 <Row style={{marginTop: "1%"}}>
                     <Col sm={{ span: 2, offset: 4 }}>
-                    <MDBTypography tag='h5' variant="h5" value={redux_data.fname} style={{textAlign:'center'}}>First Name</MDBTypography>
+                    <MDBTypography tag='h5' variant="h5" p={redux_data.fname} style={{textAlign:'center'}}>First Name</MDBTypography>
                     <MDBInput id="fname" size="lg"/>
                     </Col>
                     <Col sm={{ span: 2, offset: 0 }}>

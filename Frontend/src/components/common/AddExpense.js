@@ -31,7 +31,7 @@ const AddExpense = ({open, onToggle}) => {
         <MDBModal isOpen={open} toggle={onToggle}>
             <MDBModalHeader toggle={onToggle}>Add an Expense</MDBModalHeader>
             <MDBModalBody>
-                <h4>With You and Group:</h4><MDBInput id="group_name" label="Material input"/>
+                <h4>With You and Group:</h4><MDBInput id="group_name" label="Group Name"/>
                 <br/><br/>
                 <MDBInput id="exp_name" label="Expense Name"/>
                 <h4>{localStorage.getItem('currency')}</h4><MDBInput id="exp" label="You Paid"/>
