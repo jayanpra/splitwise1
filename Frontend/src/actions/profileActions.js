@@ -36,3 +36,21 @@ export const clearError = createAsyncThunk(
     return {arg: true}
   }
 )
+
+export const sendProfileImage = createAsyncThunk(
+  'users/profileImage',
+  async (formData) => {
+    const config = {
+      headers: { 
+        'content-type': 'multipart/form-data'
+      }
+    }
+    const response = await axios.post('http://localhost:3001/imageupdate',formData,config )
+     if (response.status === 200) {
+          return {status: true, message: "Image has been Updated"}
+    }
+    else {
+      return {status: false, message: "Server is Down"}
+    }
+  }
+)

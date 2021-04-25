@@ -19,3 +19,10 @@ export const clearError = createAsyncThunk(
       return {arg: true}
     }
   )
+
+  export const reverseList = createAsyncThunk(
+    'users/recentreverse',
+    async () => {
+      return {arg: true}
+    }
+  )

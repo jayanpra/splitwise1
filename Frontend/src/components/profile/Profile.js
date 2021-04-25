@@ -10,7 +10,7 @@ import AddExpense from '../common/AddExpense';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from "react-redux";
-import {get_data, send_update, clearError} from '../../actions/profileActions'
+import {get_data, send_update, clearError, sendProfileImage} from '../../actions/profileActions'
 
 const Profile = () => {
   const currency = ['USD', 'KWD', 'BHD', 'GBP', 'EUR', 'CAD'];
@@ -70,30 +70,9 @@ const Profile = () => {
     dispatch(get_data(localStorage.getItem('token')))
   },[dispatch]);
   
-  const onImageChange = (event) => {
-    const formData = new FormData();
-    console.log(event.target.files[0]);
-    formData.append('profileImage',event.target.files[0],event.target.files[0].name + ',' + localStorage.getItem('token'));
-    const config = {
-      headers: { 
-        'content-type': 'multipart/form-data'
-      }
-    }
-    for (var value of formData.values()) {
-        console.log(value);
-    }
-    axios.post('http://localhost:3001/imageupdate',formData,config )
-      .then((response) => {
-        if (response.status === 200) {
-          console.log("Records Saved")
-          const regex = /\/[\w]+\.\w+/
-          const new_path = redux_data.pic_loc.replace(regex, event.target.files[0].name)
-          window.location.reload(false)
-        }
-      })
-      .then((response) => {
-          console.log("DataBase Issue")
-      }); 
+  const onImageChange = (object) => {
+    console.log(object)
+    dispatch(sendProfileImage(object))
   }
 
   const onProfileChange = async (value) => {
@@ -123,14 +102,14 @@ const Profile = () => {
         <ToastContainer />
         <AddExpense open={expTog} onToggle={showAddExpense}/>
         <Navigator loggedin={true}/>
-            <Row style={{marginTop:"100px"}}> 
-                <Col sm={2}>
+            <Row style={{marginTop:"5%", marginLeft:"0.2%"}}> 
+                <Col sm={{ span: 2, offset: 0 }}>
                 <GroupSide LogOut={LogOut} launchExpense={showAddExpense}/>
                 </Col>
-                <Col sm={6}>
+                <Col sm={{ span: 7, offset: 0 }}>
                     <ProfileView onImageChange={onImageChange} para={redux_data} onChange={onProfileChange}/>
                 </Col>
-                <Col sm={3}>
+                <Col sm={{ span: 2, offset: 0 }}>
                     <Row>
                     <Container style={{height:"100px", marginTop:"50px"}}>
                         <h5 style={{textAlign: "left"}}>Your Currency:</h5>

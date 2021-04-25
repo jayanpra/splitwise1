@@ -56,7 +56,7 @@ const handle_request = async (req, callback) => {
                     name: user.fname + " " + user.lname,
                     email: user.email,
                     phone: 'phone' in user ? user.phone : null,
-                    pic : 'pic' in user ? user.pic : null, 
+                    pic : 'image' in user ? `${id}/${user.image}` : null, 
                     currency: 'currency' in user ? user.currency : USD, 
                     timezone: 'timezone' in user ? user.timezone : null, 
                     language: 'language' in user ? user.language : null, 

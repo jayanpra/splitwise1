@@ -1,11 +1,9 @@
-import React from 'react'
+import {useState} from 'react'
 import { MDBCard, MDBCardBody, MDBCardTitle,  MDBContainer, MDBBtn} from 'mdbreact';
 import DashItems from '../common/DashItems';
 import ToggleBox from '../common/ToggleBox';
-import OverflowScrolling from 'react-overflow-scrolling';
 
 const GroupBody = ({name, expense_list,onChange, exitGroup}) => {
-    console.log(expense_list)
     return (
         <div>
             <MDBContainer style={{width:"80%", height:"100%"}}>

@@ -20,7 +20,7 @@ const ToggleBox = ({heading, value,color,tick_color,cross_color, edit_color, onC
             <h5 style={{ textAlign:"left"}}>{heading}</h5>
             {editmode ? <div>
                 <InputGroup className="mb-3" style={{width:"50%"}}>
-                    <FormControl
+                    <input class="form-control form-rounded"
                     placeholder={heading.toLowerCase()}
                     onChange={inputChange} />
                     <FaCheck style={{color: tick_color, cursor: 'pointer'}} onClick={() => onChangeX()}/>

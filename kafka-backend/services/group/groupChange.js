@@ -53,7 +53,7 @@ const handle_request = async (req, callback) => {
             callback(null, {
                 status: 200,
                 data: finaldata,
-                success: false,
+                success: true,
             })
         }
         else {
@@ -67,7 +67,7 @@ const handle_request = async (req, callback) => {
                                     amount: group.expense[i].amount, color:'green'})
                 }
                 else{
-                    expenses.push({ expense_id: group[0].expense[i]._id,
+                    expenses.push({ expense_id: group.expense[i]._id,
                         expense_name: group.expense[i].exp_name, 
                         date:group.expense[i].date, 
                         shares:group.expense[i].share, 
@@ -78,7 +78,7 @@ const handle_request = async (req, callback) => {
                 callback(null, {
                     status: 200,
                     data: finaldata,
-                    success: false,
+                    success: true,
                 })
             }
         }

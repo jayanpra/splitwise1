@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import {useState} from 'react'
 import {Form} from 'react-bootstrap'
 import {FaCheck} from "react-icons/fa";
 
@@ -11,14 +11,10 @@ const ProfileMetric = ({head, options, para, onChange}) => {
         onChange({value:diff, type:head.toLowerCase()})
         onDiff(null);
     };
-    useEffect(() => {
-        
-        options.splice(options.indexOf(para),1)
-    },[options, para])
 
     return (
         <div>
-             <Form.Control onChange={changeElement} as="select">
+             <Form.Control class="form-select" onChange={changeElement} as="select">
                 <option selected>{para}</option>
                 {options.map((option) => (
                     <option>{option}</option>

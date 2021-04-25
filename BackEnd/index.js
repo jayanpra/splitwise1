@@ -957,6 +957,7 @@ app.post('/groupChange', async function(req,res) {
     if (!results.success) {
       res.status(results.status).send(results.message);
     } else {
+      console.log(results.data)
       res.status(results.status).send(results.data);
     }
   });
@@ -1565,6 +1566,13 @@ app.post('/imageupdate', function(req,res) {
     const file = req.files.profileImage;
     var x = req.files.profileImage.name.split(',')[1];
     const userID = get_id(x);
+    if (!userID){
+        res.writeHead(204,{
+            'Content-Type' : 'text/plain'
+        })
+        res.end("Token has expired")
+        return
+    }
     const fileName = req.files.profileImage.name.split(',')[0];
     console.log(__dirname);
     var pathToImage = path.join(__dirname, './public');
@@ -1576,24 +1584,42 @@ app.post('/imageupdate', function(req,res) {
     if (!fs.existsSync(filePathwithoutfileName)) {
         fs.mkdirSync(filePathwithoutfileName);
     }
-    file.mv(filePath, err => {
+    file.mv(filePath, async err => {
         if (err) {
             return res.status(500).end(err);
         }
         else {
-            var sql = `UPDATE userInfo SET image='${fileName}' WHERE id=${userID}`;
-            db.query(sql, (err, results) => {
-                if (err) {
-                    console.log(err);
-                    res.status(400).end("Error:", err);
-                }
-            });
+            console.log(fileName, " -----", userID)
+            if (false){
+                // var sql = `UPDATE userInfo SET image='${fileName}' WHERE id=${userID}`;
+                // db.query(sql, (err, results) => {
+                //     if (err) {
+                //         console.log(err);
+                //         res.status(400).end("Error:", err);
+                //     }
+                // });
+            }
+            else {
+                const val = await User.findById(userID)
+                val.image = fileName
+                val.save((err) => {
+                    console.log
+                    if ( err && err.code !== 11000 ) {
+                        res.status(204).send("Database Issue");
+                        return
+                    }
+                    if ( err && err.code === 11000 ) {
+                        res.status(204).send("Database Issue");
+                        return
+                    }
+                    res.status(200).send("UpDate Successful");
+                })
+
+            }
+            
         }
     })
-    res.json({
-        fileName: fileName,
-        filePath: filePath
-    })
+    
 });
 
 app.post('/imagegroupupdate', function(req,res) {
@@ -1614,22 +1640,37 @@ app.post('/imagegroupupdate', function(req,res) {
     if (!fs.existsSync(filePathwithoutfileName)) {
         fs.mkdirSync(filePathwithoutfileName);
     }
-    file.mv(filePath, err => {
+    file.mv(filePath, async err => {
         if (err) {
             return res.status(500).end(err);
         }
         else {
-            var sql = `UPDATE groupInfo SET group_Pic='${fileName}' WHERE group_Name=${userID}`;
-            db.query(sql, (err, results) => {
-                if (err) {
-                    console.log(err);
-                    res.status(400).end("Error:", err);
-                }
-            });
+            if (false){
+                // var sql = `UPDATE userInfo SET image='${fileName}' WHERE id=${userID}`;
+                // db.query(sql, (err, results) => {
+                //     if (err) {
+                //         console.log(err);
+                //         res.status(400).end("Error:", err);
+                //     }
+                // });
+            }
+            else {
+                const val = await Group.findById(userID)
+                val.group_pic = fileName
+                val.save((err) => {
+                    console.log
+                    if ( err && err.code !== 11000 ) {
+                        res.status(204).send("Database Issue");
+                        return
+                    }
+                    if ( err && err.code === 11000 ) {
+                        res.status(204).send("Database Issue");
+                        return
+                    }
+                    res.status(200).send("UpDate Successful");
+                })
+
+            }
         }
-    })
-    res.json({
-        fileName: fileName,
-        filePath: filePath
     })
 });

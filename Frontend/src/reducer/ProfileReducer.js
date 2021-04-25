@@ -1,5 +1,5 @@
 import { createSlice} from '@reduxjs/toolkit';
-import {get_data, send_update, clearError} from '../actions/profileActions'
+import {get_data, send_update, clearError, sendProfileImage} from '../actions/profileActions'
 
 export const ProfileReducer = createSlice({
     name: "profile",
@@ -30,7 +30,7 @@ export const ProfileReducer = createSlice({
           else {
             state.phone = response_data.phone
           }
-          state.pic_loc = response_data.pic_loc
+          state.pic_loc = `${process.env.REACT_APP_PROFILE}/${response_data.pic}`
           state.currency =  response_data.currency
           state.timezone = response_data.timezone 
           state.language = response_data.language
@@ -68,10 +68,6 @@ export const ProfileReducer = createSlice({
                     state.language = value
                     break;
                   }
-                  case 'image':{
-                    state.pic_info = value
-                    break;
-                  }
                   default:
                     break;
                 }
@@ -89,6 +85,12 @@ export const ProfileReducer = createSlice({
       state.error = false
       state.feed = ""
       state.success = false
+  },
+  [sendProfileImage.fulfilled] : (state, action) => {
+    if (action.payload.status) {
+      state.success = true
+      state.feed = action.payload.message
+    }
   },
   },
     

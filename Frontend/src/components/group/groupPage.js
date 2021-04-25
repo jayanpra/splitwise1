@@ -12,7 +12,7 @@ import ProfileImage from '../profile/profileImage'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from "react-redux";
-import { setGroup, setSelectedGroup, setImage, removeGroup,approveGroup } from '../../reducer/GroupReducer';
+import {get_group, change_group, approve_group, exit_group} from '../../actions/groupAction'
 
 
 const GroupPage = () => {
@@ -29,6 +29,7 @@ const GroupPage = () => {
 
     const [expTog, setToggle] = useState(false)
     const [group_req, getReq] = useState([])
+    const [group_id,changeID] = useState(null)
     const [show_req, toggleShow] = useState(false)
     const [delayed, noSession] = useState(false)
     const notify = (message) => toast(message);
@@ -38,52 +39,21 @@ const GroupPage = () => {
     }
 
     useEffect(() => {
-        if (redux_data.name === null) {
-          const token = localStorage.getItem('token');
-          if (token) {
+        const token = localStorage.getItem('token');
+        if (token) {
             const serverData = { 'token': token };
-            axios.defaults.withCredentials = true;
-            axios.post('http://localhost:3001/groupFill', serverData)
-              .then((response) => {
-                if (response.status === 200) {
-                    console.log(response.data)
-                    let group_data = []
-                    for (let i in response.data.group){
-                        group_data.push(response.data.group[i].name)
-                    }
-                    dispatch(setGroup({name:group_data[0], groups:response.data.group, selected_group: response.data.expense, group_name:group_data, pic: "http://localhost:3001/" + response.data.pics}))
-                    setData({
-                      name: group_data[0],
-                      groups: [...response.data.group],
-                      selected_group: [...response.data.expense],
-                      group_name: [...group_data],
-                      pic: "http://localhost:3001/" + response.data.pics
-                    });
-                }
-                else {
-                    console.log(response)
-                }
-              })
-              .then((response) => {
-                console.log(response)
-              }); 
-          }
-          else {
-            noSession(true)
-          }
+            dispatch(get_group(serverData))
         }
-    },[redux_data]);
+        else {
+            noSession(true)
+        }
+    },[dispatch]);
 
     const showAddExpense = () => {
         setToggle(!expTog)
     }
 
     const showRequest = () => {
-        // for(let i in redux_data.groups){
-        //     if (redux_data.groups[i].active === 'passive'){
-        //         getReq([...group_req, redux_data.groups[i].name])
-        //     }
-        // }
         toggleShow(!show_req)
     }
 
@@ -97,42 +67,20 @@ const GroupPage = () => {
         }
         console.log(redux_data.groups)
         console.log("name is ", name)
-        const serverData = { token: localStorage.getItem('token'), group_id: gid };
-        axios.defaults.withCredentials = true;
-        axios.post('http://localhost:3001/altergroup', serverData)
-            .then((response) => {
-                if (response.status === 200) {
-                    dispatch(approveGroup(id))
-                }
-                toggleShow(false)
-              })
-            .then((response) => {
-                
-            }); 
+        const serverData = { token: localStorage.getItem('token'), group_id: gid, seq: id };
+        dispatch(approve_group(serverData))
     }
 
     const changeGroup = (gname) => {
         let gid;
+        console.log(gname)
         for(let i in redux_data.groups){
             if (redux_data.groups[i].name === gname){
                 gid = redux_data.groups[i].id
             }
         }
-        console.log("gname ", gname, gid)
-        const serverData = { token: localStorage.getItem('token'), group_id: gid };
-        axios.post('http://localhost:3001/groupChange', serverData)
-            .then((response) => {
-                if (response.status === 200) {
-                    dispatch(setSelectedGroup({name: gname, selected_group: response.data.expense}))
-                    setData({
-                        ...data,
-                        name: gname,
-                        selected_group: [...response.data.expense]
-                    })
-                }
-              })
-            .then((response) => {
-            }); 
+        const serverData = { token: localStorage.getItem('token'), group_id: gid, group_name: gname};
+        dispatch(change_group(serverData))
     }
 
     const exitGroup = (gname) => {
@@ -143,21 +91,7 @@ const GroupPage = () => {
             }
         }
         const serverData = { token: localStorage.getItem('token'), group_id: gid };
-        axios.post('http://localhost:3001/groupExit', serverData)
-            .then((response) => {
-                if (response.status === 200) {
-                    if (response.data.message === "Group Not Settled"){
-                        notify("In a hurry to leave this group settle up first")
-                    }
-                    else if (response.data.message === "Group Settled"){
-                        dispatch(removeGroup(gname))
-                        changeGroup(redux_data.group_names[0])
-                        setData({...data, name:null})
-                    }
-                }
-              })
-            .then((response) => {
-            }); 
+        dispatch(exit_group(serverData, gname))
     }
 
 
@@ -194,6 +128,7 @@ const GroupPage = () => {
               console.log("DataBase Issue")
           }); 
     }
+
     return (
         <div style={{overflow: 'auto'}}>
             <ToastContainer />
@@ -220,7 +155,7 @@ const GroupPage = () => {
                         <MDBBtn onClick={showRequest} color="warning">Show Group Request</MDBBtn>}
                     </Row>
                     <Row style={{marginTop: "2%"}}>
-                    <ProfileImage pic ={redux_data.pic} onImageChange={onImageChange} />
+                    <ProfileImage pic ={redux_data.pic} onImageChange={onImageChange} group_id={redux_data.group_id}/>
                     </Row>
                 </Col>
             </Row>

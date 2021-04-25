@@ -1,86 +1,97 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {get_group}  from '../actions/groupAction'
+import {get_group, change_group, approve_group, exit_group}  from '../actions/groupAction'
 
 export const GroupReducer = createSlice({
     name: "group",
     initialState:{
         name: null,
+        group_id: '',
         groups: [],
         group_name: [],
         selected_group: [],
         currency: null,
         pic: null,
         group_req: [],
-        exit_flag: false,
+        error: false,
+        sucess: false,
+        feed: ''
     },
     reducers: {
-        setGroup(state,action) {
-            state.name = action.payload.name
-            state.groups = action.payload.groups
-            state.group_name = action.payload.group_name
-            state.selected_group = action.payload.selected_group
-            state.currency = action.payload.currency
-            state.pic = action.payload.pic
-            for (let i in action.payload.groups){
-                if (action.payload.groups[i].active === 'passive') {
-                    state.group_req.push(action.payload.groups[i].name)
-                }
-            }
-            
-        },
-        setSelectedGroup(state,action){
-            state.name = action.payload.name
-        },
-        setImage(state,action){
-            state.pic = action.payload.pic
-        },
         removeGroup(state,action){
-            state.groups.splice(state.groups.indexOf(action.payload),1)
+            
         },
         approveGroup(state,action){
             state.groups[action.payload].active = "active"
         },
     },
     extraReducers: {
-        [get_group.fullfilled]: (state, action) => {
-            state.name=''
-            state.groups = []
-            state.group_name = []
-            state.selected_group = []
-            state.currency = null
-            state.pic = null
-            state.exit_flag = false
-            if (typeof action.payload !== 'undefined')
-            {
-                let group_data = []
-                for (let i in action.payload.group){
-                    group_data.push(action.payload.group[i].name)
-                    if (action.payload.groups[i].active === 'passive') {
-                        state.group_req.push(action.payload.groups[i].name)
-                    }
-                }
-                state.name = group_data[0]
-                state.groups = action.payload.group
-                state.group_name = group_data
-                state.selected_group = action.payload.expense
+        [get_group.fulfilled]: (state, action) => {
+            if (action.payload.auth){
+                state.name=''
+                state.groups = []
+                state.group_name = []
+                state.selected_group = []
                 state.currency = null
-                state.pic =  "http://localhost:3001/" + action.payload.pics
+                state.pic = null
+                state.exit_flag = false
+                console.log(action.payload.data)
+                let group_data = []
+                for (let i in action.payload.data.group){
+                        group_data.push(action.payload.data.group[i].name)
+                        if (action.payload.data.group[i].active === 'passive') {
+                            state.group_req.push(action.payload.data.group[i].name)
+                        }
+                    }
+                state.name = group_data[0]
+                state.group_id = action.payload.data.group[0].id
+                state.groups = action.payload.data.group
+                state.group_name = group_data
+                state.selected_group = action.payload.data.expense
+                state.currency = null
+                state.pic =  `${process.env.REACT_APP_GROUP}/${action.payload.data.pics}`
+                }
+            else {
+                state.error = true
+                state.feed = action.payload.message
+            }
+            
+        },
+        [change_group.fulfilled]: (state, action) => {
+            console.log(action.payload)
+            if (action.payload.auth){
+                state.sucess = true
+                state.selected_group = action.payload.data.expense
+                state.name = action.payload.name
+                state.group_id = action.payload.id
             }
             else {
-                state.exit_flag = true
+                state.error = true
+                state.feed = action.payload.message
             }
         },
-        [get_group.fullfilled]: (state, action) => {
-            if (typeof action.payload !== 'undefined')
-            {
-                state.selected_group = action.payload.expense
+        [approve_group.fulfilled]: (state, action) => {
+            if (action.payload.auth){
+                state.sucess = true
+                state.feed = "Successfully Aprroved"
+                state.groups[action.payload.id].active = "active"
             }
             else {
-                state.exit_flag = true
+                state.error = true
+                state.feed = action.payload.message
             }
+        },
+        [exit_group.fulfilled]: (state, action) => {
+            if (action.payload.auth){
+                state.sucess = true
+                state.feed = "Successfully Exited"
+                state.groups.splice(state.groups.indexOf(action.payload.name),1)
+            }
+            else {
+                state.error = true
+                state.feed = action.payload.message
+            } 
         }
-    }
+    }   
 });
 
-export const {setGroup, setSelectedGroup, setImage, removeGroup, approveGroup} = GroupReducer.actions;
 export default GroupReducer.reducer

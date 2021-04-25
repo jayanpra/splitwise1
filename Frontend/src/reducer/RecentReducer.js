@@ -1,35 +1,34 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {get_data, clearError} from '../actions/recentAction'
+import {get_data, clearError, reverseList} from '../actions/recentAction'
 
 export const RecentReducer = createSlice({
     name: "recent",
     initialState:{
-        user_list: '',
+        user_list: [],
         error: false,
-        feed: ''
-    },
-    reducers: {
-        addRecent(state,action) {
-            state.user_list = action.payload
-        },
+        feed: '',
+        sucess: false,
     },
     extraReducers:{
         [get_data.fulfilled] : (state, action) => {
             if (!action.payload.error){
                 state.user_list = action.payload.data.expense
+                state.sucess = true
             }
             else{
                 state.error = true
                 state.feed = action.payload.message
             }
         },
-        [clearError.fulfilled] : (state, action) => {
-            
+        [clearError.fulfilled] : (state, action) => {  
             state.error = false
             state.feed = ''
+            state.sucess = true
+        },
+        [reverseList.fulfilled] : (state, action) => {  
+            state.user_list = state.user_list.reverse()
         },
     },
 });
 
-export const {addRecent} = RecentReducer.actions;
 export default RecentReducer.reducer
