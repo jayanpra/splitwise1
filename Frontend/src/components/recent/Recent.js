@@ -61,6 +61,10 @@ const Recent = () => {
 
     }
 
+    const LogOut = () => {
+        noSession(true)
+    }
+
     const paginate = (number) => setCurrentPage(number)
     const changeOrder = () => {
         console.log("Change Started")
@@ -94,7 +98,7 @@ const Recent = () => {
             </MDBContainer></Row>
             <Row>
                 <Col sm={3}>
-                    <GroupSide />
+                    <GroupSide LogOut={LogOut}/>
                 </Col>
                 <Col sm={9}>
                 <Row>
