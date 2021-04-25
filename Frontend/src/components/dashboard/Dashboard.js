@@ -25,7 +25,7 @@ const Dashboard = () => {
             const serverData = { 'token': token, settle: redux_data.friends.settle };
             dispatch(settle_up(serverData))
             // axios.defaults.withCredentials = true;
-            // axios.post('http://localhost:3001/settleUp', serverData)
+            // axios.post('http://54.190.4.247:3001/settleUp', serverData)
             // .then((response) => {
             //     if (response.status === 200) {
             //         window.location.reload(false)

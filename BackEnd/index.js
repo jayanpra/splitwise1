@@ -21,7 +21,7 @@ const {GET_PROFILE, SAVE_PROFILE, GET_DASH, SETTLE_UP, ADD_COMMENT, ADD_EXPENSE,
 
 
 app.set('view engine', 'ejs');
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({ origin: 'http://54.190.4.247:3000', credentials: true }));
 app.use(bodyParser.json());
 app.use(fileUpload());
 app.use( bodyParser.urlencoded( { extended: false } ) );
@@ -36,7 +36,7 @@ const db = mysql.createPool({
 })
 // const kafka = new Kafka({
 //     clientId: "splitwise",
-//     brokers: ['localhost:9091', 'localhost:9092']
+//     brokers: ['54.190.4.247:9091', '54.190.4.247:9092']
 // })
 
 mongoose.connect('mongodb+srv://jayant29:jayant29@splitwise.spixx.mongodb.net/splitwiseStorage?retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology:true},
@@ -48,7 +48,7 @@ mongoose.connect('mongodb+srv://jayant29:jayant29@splitwise.spixx.mongodb.net/sp
 
 
 // const db = mysql.createPool({
-//     host: "localhost",
+//     host: "54.190.4.247",
 //     user: "root",
 //     password: "password",
 //     database: "splitwiseStorage"
@@ -93,7 +93,7 @@ app.get("/check/auth", verifyToken,(req,res) => {
 });
 /*
 app.use(function(req, res, next){
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    res.setHeader('Access-Control-Allow-Origin', 'http://54.190.4.247:3000');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');

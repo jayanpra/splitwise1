@@ -5,7 +5,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const login = createAsyncThunk(
     'users/login',
     async (pckg) => {
-      const response = await axios.post('http://localhost:3001/login',pckg )
+      const response = await axios.post('http://54.190.4.247:3001/login',pckg )
       console.log(response.data)
       if (response.status === 200){
         localStorage.setItem('token', response.data.token)
@@ -22,7 +22,7 @@ export const login = createAsyncThunk(
 export const register = createAsyncThunk(
   'users/register',
   async (pckg) => {
-    const response = await axios.post('http://localhost:3001/register', pckg)
+    const response = await axios.post('http://54.190.4.247:3001/register', pckg)
     console.log(response.status)
     if (response.status === 200){
         localStorage.setItem('token', response.data.token)

@@ -120,7 +120,7 @@ const GroupPage = () => {
             'content-type': 'multipart/form-data'
           }
         }
-        axios.post('http://localhost:3001/imagegroupupdate',event,config )
+        axios.post('http://54.190.4.247:3001/imagegroupupdate',event,config )
           .then((response) => {
             if (response.status === 200) {
               console.log("Records Saved")

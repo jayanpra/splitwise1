@@ -4,7 +4,7 @@ const assert = chai.assert;
 const supertest = require("supertest");
 const should = require("should");
 
-var server = supertest.agent("http://localhost:3001");
+var server = supertest.agent("http://54.190.4.247:3001");
 var toke;
 
 describe("Splitwise Mocha Test", function () {

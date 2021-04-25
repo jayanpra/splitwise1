@@ -5,7 +5,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const get_data = createAsyncThunk(
     'users/fetchProfile',
     async (token) => {
-      const response = await axios.post('http://localhost:3001/profile/initialPull', {'token': token})
+      const response = await axios.post('http://54.190.4.247:3001/profile/initialPull', {'token': token})
       console.log(response.data)
       if (response.status === 200){
         return response.data
@@ -17,7 +17,7 @@ export const get_data = createAsyncThunk(
 export const send_update = createAsyncThunk(
   'users/sendupdate',
   async (pckg) => {
-    const response = await axios.post('http://localhost:3001/profile/update', pckg)
+    const response = await axios.post('http://54.190.4.247:3001/profile/update', pckg)
     console.log(response.status)
     if (response.status === 200){
         return {status: true, key: pckg.data.type, value: pckg.data.value}
@@ -45,7 +45,7 @@ export const sendProfileImage = createAsyncThunk(
         'content-type': 'multipart/form-data'
       }
     }
-    const response = await axios.post('http://localhost:3001/imageupdate',formData,config )
+    const response = await axios.post('http://54.190.4.247:3001/imageupdate',formData,config )
      if (response.status === 200) {
           return {status: true, message: "Image has been Updated"}
     }
