@@ -48,7 +48,7 @@ const SignupForms = ({onClick}) => {
     }
     return (
         <div>
-            <Container fluid style={{ backgroundColor: 'lightblue', height: '100%'}}>
+            <Container fluid style={{ backgroundColor: 'lightblue', height: '1200px'}}>
             <h6>P</h6>
             <Form>
                 <Row style={{marginTop: "4%"}}>

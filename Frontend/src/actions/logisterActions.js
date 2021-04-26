@@ -5,11 +5,16 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const login = createAsyncThunk(
     'users/login',
     async (pckg) => {
-      const response = await axios.post('http://54.190.4.247:3001/login',pckg )
+      const response = await axios.post('http://18.237.56.160:3001/login',pckg )
       console.log(response.data)
       if (response.status === 200){
         localStorage.setItem('token', response.data.token)
-        localStorage.setItem('currency', response.data.currency)
+        if (response.data.currency === 'USD'){
+          localStorage.setItem('currency', '$')
+        }
+        else{
+          localStorage.setItem('currency', response.data.currency)
+        }
         localStorage.setItem('fname', response.data.name)
         return response.data
       }
@@ -22,11 +27,16 @@ export const login = createAsyncThunk(
 export const register = createAsyncThunk(
   'users/register',
   async (pckg) => {
-    const response = await axios.post('http://54.190.4.247:3001/register', pckg)
+    const response = await axios.post('http://18.237.56.160:3001/register', pckg)
     console.log(response.status)
     if (response.status === 200){
         localStorage.setItem('token', response.data.token)
-        localStorage.setItem('currency', response.data.currency)
+        if (response.data.currency === 'USD'){
+          localStorage.setItem('currency', '$')
+        }
+        else{
+          localStorage.setItem('currency', response.data.currency)
+        }
         localStorage.setItem('fname', response.data.name)
         return {auth: true, message: "Succesfully Registered"}
     }

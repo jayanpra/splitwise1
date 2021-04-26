@@ -5,7 +5,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const get_data = createAsyncThunk(
     'users/fetchRecent',
     async (pckg) => {
-      const response = await axios.post('http://54.190.4.247:3001/pullRecent', pckg)
+      const response = await axios.post('http://18.237.56.160:3001/pullRecent', pckg)
       if (response.status === 200){
         return {error: false, data: response.data}
       }

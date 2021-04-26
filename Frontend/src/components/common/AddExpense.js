@@ -15,7 +15,7 @@ const AddExpense = ({open, onToggle}) => {
             expense: exp,
         }
         axios.defaults.withCredentials = true;
-        axios.post('http://54.190.4.247:3001/expenseAdd', data)
+        axios.post('http://18.237.56.160:3001/expenseAdd', data)
             .then((response) => {
                 if (response.status === 200) {
                   onToggle()

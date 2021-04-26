@@ -56,7 +56,12 @@ export const ProfileReducer = createSlice({
                     break;
                   }
                   case 'currency':{
-                    localStorage.setItem("currency", value)
+                    if (value === 'USD'){
+                      localStorage.setItem('currency', '$')
+                    }
+                    else{
+                      localStorage.setItem('currency', value)
+                    }
                     state.currency = value
                     break;
                   }

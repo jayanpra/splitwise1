@@ -40,7 +40,7 @@ const GroupCreate = () => {
             if (!token){
                 noSession(true)
             }
-            axios.post('http://54.190.4.247:3001/groupSuggest', { headers: {"token": `${token}`} } )
+            axios.post('http://18.237.56.160:3001/groupSuggest', { headers: {"token": `${token}`} } )
             .then((response) => {
                 console.log(response.data)
                 console.log("Sucessful")
@@ -78,7 +78,7 @@ const GroupCreate = () => {
             data.group_members.push(value)
 
         }
-        axios.post('http://54.190.4.247:3001/groupCreate', data)
+        axios.post('http://18.237.56.160:3001/groupCreate', data)
           .then((response) => {
             console.log("Sucessful")
             if (response.status === 200) {

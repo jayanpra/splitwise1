@@ -58,7 +58,7 @@ const handle_request = async (req, callback) => {
                     lender_id: keys[i],
                     borrow_id: id,
                     expense_name: 'Settle Up Amount',
-                    expense: settle_data[keys[i]],
+                    expense: settle_data[keys[i]].toFixed(2),
                     date: date_string,
                 })
             }
@@ -67,7 +67,7 @@ const handle_request = async (req, callback) => {
                     lender_id: id,
                     borrow_id: keys[i],
                     expense_name: 'Settle Up Amount',
-                    expense: settle_data[keys[i]] * -1,
+                    expense: settle_data[keys[i]].toFixed(2) * -1,
                     date: date_string,
                 })
             }

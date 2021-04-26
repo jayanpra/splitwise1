@@ -42,7 +42,7 @@ const Register = () => {
         }
         dispatch(register(data))
         // axios.defaults.withCredentials = true;
-        // axios.post('http://54.190.4.247:3001/register',data)
+        // axios.post('http://18.237.56.160:3001/register',data)
         // .then(response => {
         //     console.log("Status Code : ",response.status);
         //     if(response.status === 200){

@@ -6,13 +6,12 @@ import logo from './splitwise_logo.png'
 const LandingBody = () => {
     return (
         <div>
-                <Container fluid style={{ backgroundColor: 'lightblue', height: '1000px' }}>
-                    <Col sm={7}>
-                    <Jumbotron style={{ height: '1000px' }}>
+                <Container style={{ backgroundColor: 'lightblue', height: '100%' }}>
+                    <p>.</p>
+                    <Jumbotron style={{ height: '1200px' }}>
                         <h1 style={{marginTop: '60px', textAlign: 'left'}}> Hi there, Still Using Old Tricks ? </h1>
                         <h3 style={{marginTop: '10px', textAlign: 'left'}}>Jump to Splitwise <img src={logo} width="30" height="30" alt=""/></h3>
                     </Jumbotron>
-                    </Col>
                 </Container>
         </div>
     )

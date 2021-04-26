@@ -74,6 +74,8 @@ const GroupPage = () => {
         console.log("name is ", name)
         const serverData = { token: localStorage.getItem('token'), group_id: gid, seq: id };
         dispatch(approve_group(serverData))
+        notify('Group Approved')
+        showRequest()
     }
 
     const changeGroup = (gname) => {
@@ -97,6 +99,7 @@ const GroupPage = () => {
         }
         const serverData = { token: localStorage.getItem('token'), group_id: gid };
         dispatch(exit_group(serverData, gname))
+        window.location.reload()
     }
 
 
@@ -120,7 +123,7 @@ const GroupPage = () => {
             'content-type': 'multipart/form-data'
           }
         }
-        axios.post('http://54.190.4.247:3001/imagegroupupdate',event,config )
+        axios.post('http://18.237.56.160:3001/imagegroupupdate',event,config )
           .then((response) => {
             if (response.status === 200) {
               console.log("Records Saved")
