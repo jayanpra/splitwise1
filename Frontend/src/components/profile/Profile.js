@@ -100,7 +100,7 @@ const Profile = () => {
     <div>
         {delayed ? <Redirect to='/landing'/>: null}
         <ToastContainer />
-        <AddExpense open={expTog} onToggle={showAddExpense}/>
+        <AddExpense open={expTog} onToggle={showAddExpense} notify={notify}/>
         <Navigator loggedin={true}/>
             <Row style={{marginTop:"5%", marginLeft:"0.2%"}}> 
                 <Col sm={{ span: 2, offset: 0 }}>

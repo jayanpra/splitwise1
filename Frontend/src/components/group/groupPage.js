@@ -123,7 +123,7 @@ const GroupPage = () => {
             'content-type': 'multipart/form-data'
           }
         }
-        axios.post('http://18.237.56.160:3001/imagegroupupdate',event,config )
+        axios.post('http://localhost:3001/imagegroupupdate',event,config )
           .then((response) => {
             if (response.status === 200) {
               console.log("Records Saved")
@@ -138,7 +138,7 @@ const GroupPage = () => {
         <div style={{overflow: 'auto'}}>
             <ToastContainer />
             {delayed ? <div>{notify("Logging out")}<Redirect to='/landing'/></div>: null}
-            <AddExpense open={expTog} onToggle={showAddExpense}/>
+            <AddExpense open={expTog} onToggle={showAddExpense} notify={notify}/>
             <Navigator loggedin={true}/>
             <Container fluid style={{ backgroundColor: 'lightblue', position: "fixed", top: '2%', left:0, height: "100%" }}>
             <Row style={{marginTop: "4%"}}>

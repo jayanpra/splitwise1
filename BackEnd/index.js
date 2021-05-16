@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const hashFunction = require('password-hash');
 const fileUpload = require('express-fileupload');
 const jwtoken= require('jsonwebtoken');
+const passport = require("passport");
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose')
@@ -19,13 +20,18 @@ const iExpense = require('./models/iExpenseModel')
 const Member = require('./models/memberModel')
 const {GET_PROFILE, SAVE_PROFILE, GET_DASH, SETTLE_UP, ADD_COMMENT, ADD_EXPENSE, GET_COMMENT, GROUP_APPROVE, GROUP_CHANGE, GROUP_CREATE, GROUP_EXIT, GROUP_FILL, GROUP_SUGGEST, LOGIN, REGISTER} = require('./kafka/topics')
 
-
+const { initializePassport } = require("./passport");
+const { requireSignIn } = require("./passport");
 app.set('view engine', 'ejs');
-app.use(cors({ origin: 'http://18.237.56.160:3000', credentials: true }));
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(bodyParser.json());
 app.use(fileUpload());
 app.use( bodyParser.urlencoded( { extended: false } ) );
 app.use(express.static(path.resolve('./public')));
+// Using Passport for authentication
+app.use(passport.initialize());
+app.use(passport.session());
+initializePassport();
 dotenv.config()
 
 const db = mysql.createPool({
@@ -36,7 +42,7 @@ const db = mysql.createPool({
 })
 // const kafka = new Kafka({
 //     clientId: "splitwise",
-//     brokers: ['18.237.56.160:9091', '18.237.56.160:9092']
+//     brokers: ['localhost:9091', 'localhost:9092']
 // })
 
 mongoose.connect('mongodb+srv://jayant29:jayant29@splitwise.spixx.mongodb.net/splitwiseStorage?retryWrites=true&w=majority', {useNewUrlParser: true, useUnifiedTopology:true},
@@ -48,7 +54,7 @@ mongoose.connect('mongodb+srv://jayant29:jayant29@splitwise.spixx.mongodb.net/sp
 
 
 // const db = mysql.createPool({
-//     host: "18.237.56.160",
+//     host: "localhost",
 //     user: "root",
 //     password: "password",
 //     database: "splitwiseStorage"
@@ -93,7 +99,7 @@ app.get("/check/auth", verifyToken,(req,res) => {
 });
 /*
 app.use(function(req, res, next){
-    res.setHeader('Access-Control-Allow-Origin', 'http://18.237.56.160:3000');
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,OPTIONS,POST,PUT,DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');
@@ -105,7 +111,8 @@ app.post('/register', async function(req,res) {
     const payload = { body: req.body};
     kafka.make_request(REGISTER, payload, (error, results) => {
     if (!results.success) {
-      res.status(results.status).send(results.message);
+      console.log(results.message, "   ", results.status)
+      res.status(results.status).send({message: results.message});
     } else {
       res.status(results.status).send(results.data);
     }
@@ -174,7 +181,7 @@ app.post('/register', async function(req,res) {
     
 });
 
-app.post('/profile/initialPull', function(req,res){
+app.post('/profile/initialPull', requireSignIn, function(req,res){
     const payload = { body: req.body};
     kafka.make_request(GET_PROFILE, payload, (error, results) => {
     if (!results.success) {
@@ -365,6 +372,7 @@ app.post('/profile/update', async function(req,res){
 app.post('/groupCreate', async function(req,res){
     const payload = { body: req.body};
     kafka.make_request(GROUP_CREATE, payload, (error, results) => {
+    console.log(results)
     if (!results.success) {
       res.status(results.status).send(results.message);
     } else {
@@ -1177,7 +1185,7 @@ app.post('/getDash', async function(req,res){
     const payload = { body: req.body};
     kafka.make_request(GET_DASH, payload, (error, results) => {
     if (!results.success) {
-      res.status(results.status).send(results.message);
+      res.status(results.status).send({message: results.message});
     } else {
       res.status(results.status).send(results.data);
     }

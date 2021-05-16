@@ -5,7 +5,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const get_group = createAsyncThunk(
     'users/fetchGroup',
     async (pckg) => {
-      const response = await axios.post('http://18.237.56.160:3001/groupFill', pckg)
+      const response = await axios.post('http://localhost:3001/groupFill', pckg)
       console.log(response.data)
       if (response.status === 200){
         return {auth: true, data:response.data}
@@ -19,7 +19,7 @@ export const get_group = createAsyncThunk(
 export const change_group = createAsyncThunk(
     'users/changeGroup',
     async (pckg) => {
-      const response = await axios.post('http://18.237.56.160:3001/groupChange', pckg)
+      const response = await axios.post('http://localhost:3001/groupChange', pckg)
       console.log(pckg.group_name)
       if (response.status === 200){
         return {auth: true, data:response.data, name: pckg.group_name, id: pckg.group_id}
@@ -33,7 +33,7 @@ export const change_group = createAsyncThunk(
 export const approve_group = createAsyncThunk(
   'users/approveGroup',
   async (pckg) => {
-    const response = await axios.post('http://18.237.56.160:3001/altergroup', pckg)
+    const response = await axios.post('http://localhost:3001/altergroup', pckg)
     console.log(response.data)
     if (response.status === 200){
       return {auth: true, id: pckg.seq }
@@ -47,7 +47,7 @@ export const approve_group = createAsyncThunk(
 export const exit_group = createAsyncThunk(
   'users/exitGroup',
   async (pckg, group_name) => {
-    const response = await axios.post('http://18.237.56.160:3001/groupExit', pckg)
+    const response = await axios.post('http://localhost:3001/groupExit', pckg)
     console.log(response.data)
     if (response.status === 200){
       return {auth: true, name: group_name}

@@ -78,7 +78,7 @@ const handle_request = async (req, callback) => {
         let group_list =[];
         const group = await Group.find({member: id}).populate({path: 'expense', populate: {path: 'payee'}})
         for (let i in group){
-            group_list.push({name:group[i].group_name, id:group[i]._id, active: 'active'})
+            group_list.push({name:group[i].group_name, id:group[i]._id, active: 'active', pic: group[i].group_pic})
         }
         const request = await Member.find({member_id: id}).populate('group_id')
         for (let i in request){

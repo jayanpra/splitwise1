@@ -16,14 +16,6 @@ export const GroupReducer = createSlice({
         sucess: false,
         feed: ''
     },
-    reducers: {
-        removeGroup(state,action){
-            
-        },
-        approveGroup(state,action){
-            state.groups[action.payload].active = "active"
-        },
-    },
     extraReducers: {
         [get_group.fulfilled]: (state, action) => {
             if (action.payload.auth){
@@ -51,8 +43,11 @@ export const GroupReducer = createSlice({
                 state.group_name = group_data
                 state.selected_group = action.payload.data.expense
                 state.currency = null
-                state.pic =  `${process.env.REACT_APP_GROUP}/${action.payload.data.pics}`
+                if (action.payload.data.group && action.payload.data.group.length > 0){
+                    state.group_id = action.payload.data.group[0].id
+                    state.pic =  `${process.env.REACT_APP_GROUP}/${state.group_id}/${action.payload.data.group[0].pic}`
                 }
+            }
             else {
                 state.error = true
                 state.feed = action.payload.message
@@ -66,6 +61,9 @@ export const GroupReducer = createSlice({
                 state.selected_group = action.payload.data.expense
                 state.name = action.payload.name
                 state.group_id = action.payload.id
+                for (let i in state.groups){
+                    if (state.groups[i].name === action.payload.name) state.pic = `${process.env.REACT_APP_GROUP}/${state.group_id}/${state.groups[0].pic}`
+                }
             }
             else {
                 state.error = true

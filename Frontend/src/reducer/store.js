@@ -7,6 +7,7 @@ import GroupReducer from './GroupReducer'
 import CommentReducer from './CommentReducer'
 import LogisterReducer from './Logister'
 import RecentReducer from './RecentReducer'
+import CreateGroupReducer from './CreateGroupReducer'
 
 export default configureStore({
     reducer: {
@@ -17,5 +18,6 @@ export default configureStore({
         comment: CommentReducer,
         logister: LogisterReducer,
         recent: RecentReducer,
+        create: CreateGroupReducer,
     },
 }, composeWithDevTools());

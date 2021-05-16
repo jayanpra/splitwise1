@@ -1,7 +1,7 @@
 import Navigator from './Navigator'
 import LandingBody from './LandingBody'
 import { Redirect } from "react-router-dom";
-import {useState} from 'react'
+import {useState, useEffect} from 'react'
 
 const Landing = () => {
     let [clickstate,setClick] = useState(null)

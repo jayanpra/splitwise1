@@ -1,5 +1,4 @@
 import {useState,useEffect} from 'react'
-import useAutocomplete from 'use-autocomplete' 
 import ProfileImage from "../profile/profileImage"
 import {Row,Col, Button}  from 'react-bootstrap'
 import Navigator from '../landing/Navigator'
@@ -11,8 +10,12 @@ import { Redirect } from 'react-router-dom'
 import {Hint}  from 'react-autocomplete-hint'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useSelector, useDispatch } from "react-redux";
+import {groupSuggest, createGroup, clearError} from '../../actions/createGroupAction'
 
 const GroupCreate = () => {
+    const reduxData = useSelector(state => state.create)
+    const dispatch = useDispatch()
     const [groupMem, changeMember] = useState({members: [], group_member_no: [1], refresh: false})
     const [suggestion, suggest] = useState([])
     const [init, over] = useState(true)
@@ -34,29 +37,25 @@ const GroupCreate = () => {
         noSession(true)
     }
 
+    useEffect(() => {
+        if (reduxData.error){
+            notify(reduxData.error)
+            dispatch(clearError())
+        }
+        if (reduxData.success){
+            notify("Group Added")
+            gReturn(true)
+            dispatch(clearError())
+        }
+    }, [dispatch, reduxData.error, reduxData.success])
+
     useEffect (() => {
-        if (init) {
             const token = {token: localStorage.getItem('token')}
             if (!token){
                 noSession(true)
             }
-            axios.post('http://18.237.56.160:3001/groupSuggest', { headers: {"token": `${token}`} } )
-            .then((response) => {
-                console.log(response.data)
-                console.log("Sucessful")
-                if (response.status === 200) {
-                    suggest([...response.data.list])
-                    over(false)
-                }
-                else {
-                    console.log(response)
-                    over(false)
-                }
-            })
-            .then((response) => {
-            }); 
-        }
-    }, [init])
+            dispatch(groupSuggest({token: token}))
+    }, [dispatch])
 
     const onSubmit = () => {
         const gpname = document.getElementById('gpname').value.trim()
@@ -78,24 +77,25 @@ const GroupCreate = () => {
             data.group_members.push(value)
 
         }
-        axios.post('http://18.237.56.160:3001/groupCreate', data)
-          .then((response) => {
-            console.log("Sucessful")
-            if (response.status === 200) {
-                gReturn(true)
-            }
-            else if (response.status === 203) {
-                notify("The token has expired")
-            }
-            else if (response.status === 204) {
-                notify("The group already exist")
-            }
-            else {
-                console.log(response)
-            }
-          })
-          .then((response) => {
-          }); 
+        dispatch(createGroup(data))
+        // axios.post('http://localhost:3001/groupCreate', data)
+        //   .then((response) => {
+        //     console.log("Sucessful")
+        //     if (response.status === 200) {
+        //         gReturn(true)
+        //     }
+        //     else if (response.status === 203) {
+        //         notify("The token has expired")
+        //     }
+        //     else if (response.status === 204) {
+        //         notify("The group already exist")
+        //     }
+        //     else {
+        //         console.log(response)
+        //     }
+        //   })
+        //   .then((response) => {
+        //   }); 
     }
 
     return (
@@ -122,7 +122,7 @@ const GroupCreate = () => {
                         groupMem.group_member_no.map((option) => (
                             <Row>
                                 <Col sm={{ span: 5, offset: 3 }} >
-                                <Hint options={suggestion} allowTabFill>
+                                <Hint options={reduxData.groupSuggest} allowTabFill>
                                 <input style={{ width: '300px' }} value={textState[option]} id={option} onChange={e => setTextState({...textState, option : e.target.value})}/>
                                 </Hint>
                                 </Col>

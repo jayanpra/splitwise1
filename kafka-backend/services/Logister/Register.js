@@ -35,6 +35,7 @@ const handle_request = async (req, callback) => {
             lname: req.body.lname,
             email: req.body.email,
             password: password,
+            currency: "USD",
         })
         const id = record._id
         await record.save((err) => {

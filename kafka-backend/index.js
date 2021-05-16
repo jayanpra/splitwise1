@@ -17,7 +17,7 @@ const connection = require('./kafka/connection')
 
 
 app.set('view engine', 'ejs');
-app.use(cors({ origin: 'http://18.237.56.160:3000', credentials: true }));
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(bodyParser.json());
 app.use(fileUpload());
 app.use( bodyParser.urlencoded( { extended: false } ) );

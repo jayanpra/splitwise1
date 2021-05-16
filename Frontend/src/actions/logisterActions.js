@@ -5,7 +5,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const login = createAsyncThunk(
     'users/login',
     async (pckg) => {
-      const response = await axios.post('http://18.237.56.160:3001/login',pckg )
+      const response = await axios.post('http://localhost:3001/login',pckg )
       console.log(response.data)
       if (response.status === 200){
         localStorage.setItem('token', response.data.token)
@@ -27,7 +27,7 @@ export const login = createAsyncThunk(
 export const register = createAsyncThunk(
   'users/register',
   async (pckg) => {
-    const response = await axios.post('http://18.237.56.160:3001/register', pckg)
+    const response = await axios.post('http://localhost:3001/register', pckg)
     console.log(response.status)
     if (response.status === 200){
         localStorage.setItem('token', response.data.token)
@@ -40,8 +40,11 @@ export const register = createAsyncThunk(
         localStorage.setItem('fname', response.data.name)
         return {auth: true, message: "Succesfully Registered"}
     }
+    else if (response.status === 204) {
+      return {auth: false, message: "Duplicate Email Detected", status: response.status}
+    }
     else {
-        return {auth: false, message: response.data, status: response.status}
+        return {auth: false, message: "Server Unavailable", status: response.status}
     }
   }
 )

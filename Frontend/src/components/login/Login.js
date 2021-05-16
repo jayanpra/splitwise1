@@ -20,7 +20,11 @@ const Login = () => {
     const isPassed = redux_data.pass;
     const isError = redux_data.error
     useEffect(() => {
-        setClick(isPassed ? "dash" : null);
+        if (isPassed){
+            notify("Successful Login")
+            setClick('dash')
+        }
+
         if (isError){
             notify(isError)
             dispatch(clear());
@@ -55,7 +59,7 @@ const Login = () => {
         }
         await dispatch(login(data))
         axios.defaults.withCredentials = true;
-        // axios.post('http://18.237.56.160:3001/login',data)
+        // axios.post('http://localhost:3001/login',data)
         // .then(response => {
         //     console.log("Status Code :",response.status);
         //     if(response.status === 200){

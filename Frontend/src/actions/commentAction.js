@@ -5,7 +5,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 export const get_comment = createAsyncThunk(
     'users/fetchComment',
     async (pckg) => {
-      const response = await axios.post('http://18.237.56.160:3001/getcomment', pckg)
+      const response = await axios.post('http://localhost:3001/getcomment', pckg)
       console.log(response.data)
       if (response.status === 200){
         return { auth: true, id: pckg.expense_id, response: response.data}
@@ -20,7 +20,7 @@ export const get_comment = createAsyncThunk(
 export const save_comment = createAsyncThunk(
     'users/saveComment',
     async (pckg) => {
-      const response = await axios.post('http://18.237.56.160:3001/addcomment', pckg)
+      const response = await axios.post('http://localhost:3001/addcomment', pckg)
       if (response.status === 200){
         return { auth: true, comment: {author: localStorage.getItem('fname'), text: pckg.text}, post_id: pckg.expense_id}
       }

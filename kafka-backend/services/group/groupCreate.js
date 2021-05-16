@@ -87,7 +87,7 @@ const handle_request = async (req, callback) => {
             }
             if ( err && err.code === 11000 ) {
                 callback(null, {
-                    status: 400,
+                    status: 204,
                     message: 'duplicate element',
                     success: false
                 })

@@ -1,13 +1,28 @@
-import React from 'react';
 import { MDBBtn, MDBModal, MDBModalBody, MDBModalHeader, MDBModalFooter, MDBInput } from 'mdbreact';
+import {useEffect} from 'react';
+import {Form} from 'react-bootstrap'
 import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useSelector, useDispatch } from "react-redux";
+import {get_group, clearError} from '../../actions/groupAction'
 
-
-const AddExpense = ({open, onToggle}) => {
+const AddExpense = ({open, onToggle, notify}) => {
+  const reduxData = useSelector(state => state.group)
+  const dispatch = useDispatch()
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+        if (token) {
+            const serverData = { 'token': token };
+            dispatch(get_group(serverData))
+        }
+  }, [dispatch])
     const onSubmit = () => {
-        const exp = parseFloat(document.getElementById("exp").value)
+        const expense = document.getElementById("exp").value;
+        const number = /^\d+(\.\d+)$/
+        if (!number.test(expense)){
+            notify("Expense has to digits/decimal")
+            return
+        }
+        const exp = parseFloat(expense)
         const data = {
             token: localStorage.getItem("token"),
             group_name: document.getElementById('group_name').value,
@@ -15,7 +30,7 @@ const AddExpense = ({open, onToggle}) => {
             expense: exp,
         }
         axios.defaults.withCredentials = true;
-        axios.post('http://18.237.56.160:3001/expenseAdd', data)
+        axios.post('http://localhost:3001/expenseAdd', data)
             .then((response) => {
                 if (response.status === 200) {
                   onToggle()
@@ -31,7 +46,14 @@ const AddExpense = ({open, onToggle}) => {
         <MDBModal isOpen={open} toggle={onToggle}>
             <MDBModalHeader toggle={onToggle}>Add an Expense</MDBModalHeader>
             <MDBModalBody>
-                <h4>With You and Group:</h4><MDBInput id="group_name" label="Group Name"/>
+                <h4>With You and Group:</h4>
+                <Form.Control class="form-select" as="select">
+                <option id = "group_name" selected>{reduxData.name}</option>
+                {reduxData.group_name.map((option) => (
+                    <option>{option}</option>
+                    ))
+                }
+            </Form.Control>
                 <br/><br/>
                 <MDBInput id="exp_name" label="Expense Name"/>
                 <h4>{localStorage.getItem('currency')}</h4><MDBInput id="exp" label="You Paid"/>

@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import {get_dash} from '../actions/dashAction'
+import {get_dash, clearError} from '../actions/dashAction'
 
 export const DashReducer = createSlice({
     name: "dash",
@@ -9,6 +9,7 @@ export const DashReducer = createSlice({
         amt_plus: 0.0,
         amt_minus: 0.0,
         friends: {},
+        error_message: '',
 
     },
     reducers: {
@@ -30,41 +31,44 @@ export const DashReducer = createSlice({
     },
     extraReducers:{
         [get_dash.fulfilled]: (state,action) => {
+            if (!action.payload.auth){
+                state.error_message = action.payload.message
+                return 
+            }
             state.borrow_list = []
             state.lend_list = []
             state.amt_plus= 0.0
             state.amt_minus= 0.0
             state.friends= {}
-            if (typeof action.payload === 'object'){
-                let keys = Object.keys(action.payload.accounts)
+            if (typeof action.payload.data === 'object'){
+                let keys = Object.keys(action.payload.data.accounts)
                 for (let i in keys){
-                    const list = action.payload.accounts[keys[i]]
+                    const list = action.payload.data.accounts[keys[i]]
                     for (let i in list) {
                         if (list[i].color === "green"){
-                            //getMoney((state) => [...state, {color:"green", expense:list[i].expense, borrower: list[i].person, exp_name: list[i].ename}])
                             state.lend_list.push({color:"green", expense:list[i].expense, borrower: list[i].person, exp_name: list[i].ename})
                         }
                         else{
-                            //sendMoney((state) => [...state, {color:"red", expense:list[i].expense, lender: list[i].person, exp_name: list[i].ename}])
                             state.borrow_list.push({color:"red", expense:list[i].expense, lender: list[i].person, exp_name: list[i].ename})
                         }
                     }
                 }
-                //indSettle({...friends, settle:response.data.balance})
-                state.friends = {settle: action.payload.balance}
-                let keys2 = Object.keys(action.payload.balance)
+                state.friends = {settle: action.payload.data.balance}
+                let keys2 = Object.keys(action.payload.data.balance)
                 for (let j in keys2) {
-                    if (action.payload.balance[keys2[j]] > 0){
-                        state.amt_plus += action.payload.balance[keys2[j]]
+                    if (action.payload.data.balance[keys2[j]] > 0){
+                        state.amt_plus += action.payload.data.balance[keys2[j]]
                                 }
                     else {
-                        state.amt_minus += action.payload.balance[keys2[j]] * -1
+                        state.amt_minus += action.payload.data.balance[keys2[j]] * -1
                     }
                 }
             }
         },
+        [clearError.fulfilled]: (state,action) => {
+            state.error_message = ""
+        },
     }
 });
 
-export const {addBorrow, addLend, addDebts, addCredits, addFriend} = DashReducer.actions;
 export default DashReducer.reducer

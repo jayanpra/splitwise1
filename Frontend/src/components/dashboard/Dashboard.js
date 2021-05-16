@@ -3,16 +3,19 @@ import {Container, Col, Row} from 'react-bootstrap';
 import Navigator from '../landing/Navigator'; 
 import GroupSide from '../common/GroupSide'
 import DashEntry from '../common/DashEntry'
+import AddExpense from '../common/AddExpense';
 import { MDBCard, MDBCardBody, MDBCardTitle, MDBBtn, MDBCardText, MDBCol, MDBRow, MDBContainer } from 'mdbreact';
-//import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import { useSelector, useDispatch } from "react-redux";
-import {get_dash, settle_up} from '../../actions/dashAction';
+import {get_dash, settle_up, clearError} from '../../actions/dashAction';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard = () => {
     const dispatch = useDispatch();
     const redux_data = useSelector(state => state.dash);
     const [delayed, noSession] = useState(false)
+    const notify = (message) => toast(message);
 
     const LogOut = () => {
         noSession(true)
@@ -25,29 +28,35 @@ const Dashboard = () => {
             const serverData = { 'token': token, settle: redux_data.friends.settle };
             dispatch(settle_up(serverData))
             window.location.reload()
-            // axios.defaults.withCredentials = true;
-            // axios.post('http://18.237.56.160:3001/settleUp', serverData)
-            // .then((response) => {
-            //     if (response.status === 200) {
-            //         window.location.reload(false)
-            //     }
-            // })
-            // .then((response) => {
-                
-            // }); 
         }
         else {
             noSession(true)
         }
     }
+    useEffect(() => {
+        if (redux_data.error_message!==''){
+            notify(redux_data.error_message)
+            clearError()
+            noSession(true)
+        }
+    }, [redux_data.error_message])
 
     useEffect(() => {
-        dispatch(get_dash({token: localStorage.getItem('token')}))
-    },[])
+        clearError()
+        const token = localStorage.getItem('token');
+        if(!token){
+            noSession(true)
+        }
+        else{
+            dispatch(get_dash({token: token}))
+        }
+    },[dispatch])
 
     return (
         <div>
             {delayed ? <Redirect to='/landing'/>: null}
+            <ToastContainer/>
+            <AddExpense notify={notify}/>
             <Navigator loggedin={true}/>
             <Container fluid style={{ backgroundColor: 'lightblue', position: "fixed", top: 0, left:0, height: "1000px" }}>
             <Row><MDBContainer>

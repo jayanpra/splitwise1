@@ -32,6 +32,7 @@ const handle_request = async (req, callback) => {
         for (let i in user){
             list.push(user[i].email)
         }
+        console.log(user)
         const final_data = {list: list}
         callback(null, {
             status: 200,

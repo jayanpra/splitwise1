@@ -52,7 +52,7 @@ const handle_request = async (req, callback) => {
                 }
                 else {
                     callback(null, {
-                        status: 204,
+                        status: 422,
                         message: "Invalid Credentials",
                         success: false,
                     })
